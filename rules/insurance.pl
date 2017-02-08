@@ -189,7 +189,7 @@ if ($info{variable})
 print $q->start_table({-border=>0,-cellpadding=>'10',-width=>'300'});
 
 print $q->Tr({-align=>'CENTER',-valign=>'MIDDLE',-height => '50'},
-             $q->td($q->h2($info{animalDemoLabel})));
+             $q->td($q->h2($info{insuranceExpertLabel})));
 
 print $q->Tr({-align=>'CENTER',-valign=>'MIDDLE',-height => '50'},
              $q->td($info{display}));
@@ -267,50 +267,50 @@ print $q->end_form;
 # Debugging: Print the CLIPS Output #
 #####################################
 
-# print $q->h2('CLIPS Output');
-# 
-# if ($info{state})
-#   { print $q->p('state = ' . $info{state}); }
-# 
-# if ($info{display})
-#    { print $q->p('display = ' . $info{display}); }
-# 
-# if ($info{variable})
-#   { print $q->p('variable = ' . $info{variable}); }
-# 
-# if ($info{validAnswers})
-#   { print $q->p('validAnswers = ' . $info{validAnswers}); }
-# 
-# if ($info{displayAnswers})
-#   { print $q->p('displayAnswers = ' . $info{displayAnswers}); }
-#   
-# print $q->p("constructed variable list =|" . $variableString . "|");
-# 
-# print $q->p("constructed answer list =|" . $answerString . "|");
+ print $q->h2('CLIPS Output');
+ 
+ if ($info{state})
+   { print $q->p('state = ' . $info{state}); }
+ 
+ if ($info{display})
+    { print $q->p('display = ' . $info{display}); }
+ 
+ if ($info{variable})
+   { print $q->p('variable = ' . $info{variable}); }
+ 
+ if ($info{validAnswers})
+   { print $q->p('validAnswers = ' . $info{validAnswers}); }
+ 
+ if ($info{displayAnswers})
+   { print $q->p('displayAnswers = ' . $info{displayAnswers}); }
+   
+ print $q->p("constructed variable list =|" . $variableString . "|");
+ 
+ print $q->p("constructed answer list =|" . $answerString . "|");
 
 #########################################
 # Debugging: Print the parameter values #
 #########################################
 
-# my @names = $q->param;
-# 
-# print $q->h2('Params');
-# 
-# if ($q->param('Next'))
-#   { print $q->p('Process Next'); }
-# 
-# if ($q->param('Prev'))
-#   { print $q->p('Process Prev'); }
-# 
-# if ($q->param('Restart'))
-#   { print $q->p('Process Restart'); }
-#   
-# foreach my $param (@names)
-#   {
-#    my $value = $q->param($param);
-#   
-#    print $q->p("$param = $value");
-#   }
+ my @names = $q->param;
+ 
+ print $q->h2('Params');
+ 
+ if ($q->param('Next'))
+   { print $q->p('Process Next'); }
+ 
+ if ($q->param('Prev'))
+   { print $q->p('Process Prev'); }
+ 
+ if ($q->param('Restart'))
+   { print $q->p('Process Restart'); }
+   
+ foreach my $param (@names)
+   {
+    my $value = $q->param($param);
+   
+    print $q->p("$param = $value");
+   }
  
 ###############
 # End of HTML #

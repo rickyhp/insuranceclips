@@ -1,17 +1,10 @@
 ;;;======================================================
-;;;   Animal Identification Expert System
+;;;   Insurance Recommendation Expert System
 ;;;
-;;;     A simple expert system which attempts to identify
-;;;     an animal based on its characteristics.
-;;;     The knowledge base in this example is a 
-;;;     collection of facts which represent backward
-;;;     chaining rules. CLIPS forward chaining rules are
-;;;     then used to simulate a backward chaining inference
-;;;     engine.
 ;;;
 ;;;     CLIPS Version 6.3 Example
 ;;; 
-;;;     For use with the Animal Demo Example
+;;;
 ;;;======================================================
 
 (defmodule MAIN (export ?ALL)) 
@@ -206,7 +199,7 @@
    (printout t "prevLabel=" (find-text-for-id Prev) crlf)
    (printout t "nextLabel=" (find-text-for-id Next) crlf)
    (printout t "restartLabel=" (find-text-for-id Restart) crlf)
-   (printout t "animalDemoLabel=" (find-text-for-id AnimalDemo) crlf)
+   (printout t "insuranceExpertLabel=" (find-text-for-id InsuranceExpert) crlf)
    (halt))
 
 (defmethod handle-state ((?state SYMBOL (eq ?state interview))
@@ -224,7 +217,7 @@
    (printout t "prevLabel=" (find-text-for-id Prev) crlf)
    (printout t "nextLabel=" (find-text-for-id Next) crlf)
    (printout t "restartLabel=" (find-text-for-id Restart) crlf)
-   (printout t "animalDemoLabel=" (find-text-for-id AnimalDemo) crlf)
+   (printout t "insuranceExpertLabel=" (find-text-for-id InsuranceExpert) crlf)
    (halt))
 
 (defmethod handle-state ((?state SYMBOL (eq ?state conclusion))
@@ -235,7 +228,7 @@
    (printout t "prevLabel=" (find-text-for-id Prev) crlf)
    (printout t "nextLabel=" (find-text-for-id Next) crlf)
    (printout t "restartLabel=" (find-text-for-id Restart) crlf)
-   (printout t "animalDemoLabel=" (find-text-for-id AnimalDemo) crlf)
+   (printout t "insuranceExpertLabel=" (find-text-for-id InsuranceExpert) crlf)
    (halt))
 
 ;;; CLIPSJNI target
