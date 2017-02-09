@@ -26,7 +26,7 @@
 ;; Questions
 (text-for-id
    (id age.query)
-   (text "What is your age?"))
+   (text "Please specify your age, 1) below 17, 2) between 17 and 55, 3) above 55 ?"))
 (text-for-id
    (id income.query)
    (text "Do you have stable income?"))

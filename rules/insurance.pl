@@ -160,7 +160,7 @@ foreach (@output)
 
 print $q->header;
                     
-print $q->start_html('animal'); 
+print $q->start_html('insurance'); 
       
 #<noscript>Your browser does not support JavaScript!</noscript>
 print $q->noscript('Your browser does not support JavaScript!');
@@ -211,8 +211,9 @@ if ($info{displayAnswers})
         { $defaultValue = $prevAnswer; }
       else
         { $defaultValue = $returnAnswers[0]; }
-        
-      print $q->Tr({-align=>'CENTER',-valign=>'MIDDLE'},
+      
+      if($info{variable} eq 'income'){
+        print $q->Tr({-align=>'CENTER',-valign=>'MIDDLE'},
                    $q->td({-height => '50' },
                           $q->radio_group({-name => 'answer' ,
                                            -values => \@returnAnswers ,
@@ -220,6 +221,16 @@ if ($info{displayAnswers})
                                            -override => 1 ,
                                            -default => $defaultValue ,
                                            -linebreak => 'true'})));
+      }else{
+        print $q->Tr({-align=>'CENTER',-valign=>'MIDDLE'},
+                   $q->td({-height => '50' },
+                        $q->textfield(-name => 'answer',
+                                           -default => '',
+                                           -size => 10,
+                                           -maxlength => 10,
+                                           -override => 1)));
+      }
+                        
      }
    elsif (@returnAnswers == 1)
      {
