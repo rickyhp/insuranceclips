@@ -1,91 +1,39 @@
+
 ;;;======================================================
-;;;   Insurance Recommendation Expert System
-;;;
-;;;
-;;;     CLIPS Version 6.3 Example
-;;; 
+;;;   Insurance Expert System
 ;;;
 ;;;======================================================
 
-(defmodule MAIN (export ?ALL)) 
+;;; ***************************
+;;; * DEFTEMPLATES & DEFFACTS *
+;;; ***************************
 
-(defmodule VALIDATE (import MAIN ?ALL))
+;; to store the current goal e.g. health insurance plans
+(deftemplate current_goal (slot goal) (slot cf))
+(deftemplate new_goal (slot goal) (slot cf))
 
-(defmodule CHAIN (import MAIN ?ALL))
-
-(defmodule ASK (import MAIN ?ALL))
-
-;;;*****************
-;;;* Configuration *
-;;;*****************
-
-(deffacts MAIN::Configuration
-   (validate no)
-   (target cgi)) ; console, clipsjni, or cgi
-   
-;;;*************************
-;;;* DEFGLOBAL DEFINITIONS *
-;;;*************************
-
-(defglobal MAIN
-   ?*rule-index* = 1)
-
-;;;***************************
-;;;* DEFFUNCTION DEFINITIONS *
-;;;***************************
-
-(deffunction generate-rule-name ()
-   (bind ?name (sym-cat rule- ?*rule-index*))
-   (bind ?*rule-index* (+ ?*rule-index* 1))
-   (return ?name))
-   
-;;;***************************
-;;;* DEFTEMPLATE DEFINITIONS *
-;;;***************************
+;; to store the current facts with certainty factors
+(deftemplate current_fact (slot fact) (slot cf))
 
 (deftemplate MAIN::text-for-id
    (slot id)
    (slot text))
 
-(deftemplate MAIN::rule 
-   (slot name (default-dynamic (generate-rule-name)))
-   (slot validate (default no))
-   (multislot if)
-   (multislot then)
-   (multislot processed))
-   
-(deftemplate MAIN::question
-   (multislot valid-answers)
-   (multislot display-answers)
-   (slot variable)
-   (slot query))
-
-(deftemplate MAIN::answer
-   (slot variable))
-   
-(deftemplate MAIN::goal
-   (slot variable))
-   
-(deftemplate MAIN::variable
-   (slot name)
-   (slot value))
-   
-(deftemplate MAIN::activity)
-
-(deftemplate MAIN::welcome
-  (slot message))
-
-(deftemplate MAIN::legalanswers
-   (multislot values))
-
-(deftemplate MAIN::UI-state
+(deftemplate UI-state
    (slot id (default-dynamic (gensym*)))
    (slot display)
    (slot relation-asserted (default none))
    (slot response (default none))
    (multislot valid-answers)
    (multislot display-answers)
-   (slot state (default interview)))
+   (slot state (default middle)))
+   
+(deftemplate state-list
+   (slot current)
+   (multislot sequence))
+  
+(deffacts startup
+   (state-list))
 
 ;;;***************************
 ;;;* DEFFUNCTION DEFINITIONS *
@@ -146,48 +94,9 @@
 ;;;* STATE METHODS *
 ;;;*****************
       
-;;; Console target
-   
-(defmethod handle-state ((?state SYMBOL (eq ?state greeting))
-                         (?target SYMBOL (eq ?target console))
-                         (?display LEXEME)
-                         (?relation-asserted SYMBOL)
-                         (?valid-answers MULTIFIELD))
-   (printout t ?display crlf)
-   (assert (variable (name greeting) (value yes))))
-
-(defmethod handle-state ((?state SYMBOL (eq ?state interview))
-                         (?target SYMBOL (eq ?target console))
-                         (?question LEXEME)
-                         (?variable SYMBOL)
-                         (?response PRIMITIVE) ; default
-                         (?valid-answers MULTIFIELD)
-                         (?display-answers MULTIFIELD))
-   (bind ?display-answers (sym-cat-multifield ?display-answers))
-   (format t "%s " ?question)
-   (printout t ?display-answers " ")
-   (bind ?answer (read))
-   (if (lexemep ?answer) 
-       then (bind ?answer (lowcase ?answer)))
-   (while (not (member ?answer ?display-answers)) do
-      (format t "%s " ?question)
-      (printout t ?display-answers " ")
-      (bind ?answer (read))
-      (if (lexemep ?answer) 
-          then (bind ?answer (lowcase ?answer))))
-   (bind ?pos (member$ ?answer ?display-answers))
-   (bind ?answer (nth$ ?pos ?valid-answers))
-   (assert (variable (name ?variable) (value ?answer))))
-
-(defmethod handle-state ((?state SYMBOL (eq ?state conclusion))
-                         (?target SYMBOL (eq ?target console))
-                         (?display LEXEME))
-   (printout t ?display crlf))
-
 ;;; CGI target
 
 (defmethod handle-state ((?state SYMBOL (eq ?state greeting))
-                         (?target SYMBOL (eq ?target cgi))
                          (?display LEXEME)
                          (?relation-asserted SYMBOL)
                          (?valid-answers MULTIFIELD))
@@ -199,11 +108,10 @@
    (printout t "prevLabel=" (find-text-for-id Prev) crlf)
    (printout t "nextLabel=" (find-text-for-id Next) crlf)
    (printout t "restartLabel=" (find-text-for-id Restart) crlf)
-   (printout t "insuranceExpertLabel=" (find-text-for-id InsuranceExpert) crlf)
+   (printout t "autoDemoLabel=" (find-text-for-id InsuranceExpert) crlf)
    (halt))
 
 (defmethod handle-state ((?state SYMBOL (eq ?state interview))
-                         (?target SYMBOL (eq ?target cgi))
                          (?message LEXEME)
                          (?relation-asserted SYMBOL)
                          (?response PRIMITIVE)
@@ -217,278 +125,248 @@
    (printout t "prevLabel=" (find-text-for-id Prev) crlf)
    (printout t "nextLabel=" (find-text-for-id Next) crlf)
    (printout t "restartLabel=" (find-text-for-id Restart) crlf)
-   (printout t "insuranceExpertLabel=" (find-text-for-id InsuranceExpert) crlf)
+   (printout t "autoDemoLabel=" (find-text-for-id InsuranceExpert) crlf)
    (halt))
 
 (defmethod handle-state ((?state SYMBOL (eq ?state conclusion))
-                         (?target SYMBOL (eq ?target cgi))
-                         (?display LEXEME))
+                         (?display LEXEME)
+                         (?cf NUMBER))
    (printout t "state=conclusion" crlf)
    (printout t "display=" ?display crlf)
    (printout t "prevLabel=" (find-text-for-id Prev) crlf)
    (printout t "nextLabel=" (find-text-for-id Next) crlf)
    (printout t "restartLabel=" (find-text-for-id Restart) crlf)
-   (printout t "insuranceExpertLabel=" (find-text-for-id InsuranceExpert) crlf)
+   (printout t "autoDemoLabel=" (find-text-for-id InsuranceExpert) crlf)
+   (printout t "cf=" ?cf crlf)
    (halt))
 
-;;; CLIPSJNI target
+;;;****************
+;;;* STARTUP RULE *
+;;;****************
 
-(defmethod handle-state ((?state SYMBOL (eq ?state greeting))
-                         (?target SYMBOL (eq ?target clipsjni))
-                         (?message LEXEME)
-                         (?relation-asserted SYMBOL)
-                         (?valid-answers MULTIFIELD))
-   (assert (UI-state (display ?message)
-                     (relation-asserted ?relation-asserted)
-                     (state ?state)
-                     (valid-answers $?valid-answers)))
-   (halt))
+(defrule system-banner ""
+  (not (greeting yes))
+  =>
+  (handle-state greeting
+                (find-text-for-id WelcomeMessage)
+                greeting
+                (create$)))
 
-(defmethod handle-state ((?state SYMBOL (eq ?state interview))
-                         (?target SYMBOL (eq ?target clipsjni))
-                         (?message LEXEME)
-                         (?relation-asserted SYMBOL)
-                         (?response PRIMITIVE)
-                         (?valid-answers MULTIFIELD)
-                         (?display-answers MULTIFIELD))
-   (assert (UI-state (display ?message)
-                     (relation-asserted ?relation-asserted)
-                     (response ?response)
-                     (valid-answers ?valid-answers)
-                     (display-answers ?display-answers)))
-   (halt))
-                       
-;;;**************************
-;;;* INFERENCE ENGINE RULES *
-;;;**************************
+;;;********************
+;;;* CERTAINTY FACTORS*
+;;;********************
 
-(defrule MAIN::validate
-   (declare (salience 10))
-   (validate yes)
-   =>
-   (focus VALIDATE))
+;;;***********************************************************************
+;;; combine POSITIVE (or ZERO) certainty factors for multiple conclusions*
+;;; cf(cf1,cf2) = cf1 + cf2 * (1- cf1)                                   *
+;;;***********************************************************************
+
+(defrule combine-positive-cf
+	?f1 <- (current_goal (goal ?g)(cf ?cf1&:(>= ?cf1 0)))
+	?f2 <- (new_goal (goal ?g)(cf ?cf2&:(>= ?cf2 0)))
+  =>
+  	(retract ?f2) ; removes new_goal
+	(modify ?f1 (cf =(+ ?cf1 (* ?cf2 (- 1 ?cf1)))))
+	(printout t "B-1= " ?cf1 crlf) ;;; for debugging
+	(printout t "B-2= " ?cf2 crlf) ;;; for debugging
+	(printout t "B1-B2 combined = " (+ ?cf1 (* ?cf2 (- 1 ?cf1))) crlf)
+)
+
+;;;***********************************************************************
+;;;combine NEGATIVE certainty factors for multiple conclusions           *
+;;;cf(cf1,cf2) = cf1 + cf2 * (1+cf1)                                     *
+;;;***********************************************************************
+(defrule combine-negative-cf
+ 	(declare (salience -1))
+	?f1 <- (current_goal (goal ?g)(cf ?cf1&:(< ?cf1 0)))
+  	?f2 <- (new_goal (goal ?g)(cf ?cf2&:(< ?cf2 0)))
+  =>
+  	(retract ?f2) ; removes new_goal
+	(modify ?f1 (cf =(+ ?cf1 (* ?cf2 (+ 1 ?cf1)))))
+)
+
+;;;***********************************************************************
+;combine POSITIVE & NEGATIVE certainty factors for multiple conclusions  *
+;cf(cf1,cf2) = (cf1 + cf2)/ 1- MIN(|cf1|, |cf1|)                         *
+;;;***********************************************************************
+(defrule combine-pos-neg-cf
+ 	(declare (salience -1))
+  	?f1 <- (current_goal (goal ?g) (cf ?cf1))
+  	?f2 <- (new_goal (goal ?g) (cf ?cf2))
+  	(test (< (* ?cf1 ?cf2) 0))
+  =>
+  	(retract ?f2) ; removes new_goal
+	(modify ?f1 (cf =(/ (+ ?cf1 ?cf2) (- 1 (min (abs ?cf1) (abs ?cf2))))))
+)
+
+;;;***************
+;;;* QUERY RULES *
+;;;***************
+
+;; initialise current goal when a new_goal is asserted
+(defrule initialise-current-goal
+	?newg <- (new_goal (goal ?ng) (cf ?cfng))
+    (not (current_goal (goal ?cg) (cf ?cfg)))
+=> 	(assert (current_goal (goal ?ng) (cf ?cfng)))
+	(retract ?newg)
+)
+
+(defrule determine-gender ""
+
+   (greeting yes)
+   (not (gender ?))
    
-(defrule MAIN::startup
-   (welcome (message ?message-id))
-   (not (variable (name greeting)))
-   (target ?target)
    =>
-   (handle-state greeting
-                 ?target
-                 (find-text-for-id ?message-id)
-                 greeting
-                 (create$)))
-
-(deffacts MAIN::continue-interview
-   (continue-interview))
-         
-(defrule MAIN::continue-interview
-   (declare (salience -10))
-   ?f <- (continue-interview)
-   (not (and (goal (variable ?goal))
-             (variable (name ?goal) (value ?value))
-             (answer (variable ?goal))))
-   =>
-   (retract ?f)
-   (focus CHAIN ASK))
    
-(defrule MAIN::goal-satified ""
-   (goal (variable ?goal))
-   (variable (name ?goal) (value ?value))
-   (answer (variable ?goal))
-   (target ?target)
-   =>
-   (handle-state conclusion ?target (find-text-for-id ?value)))
-
-;;; ##################
-;;; CHAIN MODULE RULES 
-;;; ##################
-
-(defrule CHAIN::propagate-goal ""
-   (goal (variable ?goal))
-   (rule (if ?variable $?)
-         (then ?goal ? ?value))
-   =>
-   (assert (goal (variable ?variable))))
-
-(defrule CHAIN::modify-rule-match-is ""
-   (variable (name ?variable) (value ?value))
-   ?f <- (rule (if ?variable is ?value and $?rest)
-               (processed $?p))
-   =>
-   (modify ?f (if ?rest)
-              (processed ?p ?variable is ?value and)))
-
-(defrule CHAIN::rule-satisfied-is ""
-   (variable (name ?variable) (value ?value))
-   ?f <- (rule (if ?variable is ?value)
-               (then ?goal ? ?goal-value)
-               (processed $?p))
-   =>
-   (modify ?f (if) 
-              (processed ?p ?variable is ?value #)))
-              
-(defrule CHAIN::apply-rule ""
-   (rule (if)
-         (then ?goal ? ?goal-value))
-   =>
-   (assert (variable (name ?goal) (value ?goal-value))))
-
-;;; ################
-;;; ASK MODULE RULES 
-;;; ################
-
-;;;(defrule ASK::ask-question-no-legalvalues ""
-;;;   (not (legalanswers))
-;;;   ?f1 <- (goal (variable ?variable))
-;;;   (question (variable ?variable) (query ?text))
-;;;   (not (variable (name ?variable)))
-;;;   (target ?target)
-;;;   =>
-;;;   (retract ?f1)
-;;;   (assert (start))
-;;;   (assert (UI-state (display ?text)
-;;;                     (relation-asserted ?variable)
-;;;                     (response No)
-;;;                     (valid-answers No Yes))))
-
-(defrule ASK::ask-question-legalvalues ""
-   (legalanswers (values $?answers))
-   ?f1 <- (goal (variable ?variable))
-   (question (variable ?variable) (query ?query-id))
-   (not (variable (name ?variable)))
-   (target ?target)
-   =>
-   (assert (continue-interview))
-   (retract ?f1)   
+   (bind ?answers (create$ male female))
    (handle-state interview
-                 ?target
-                 (find-text-for-id ?query-id)
-                 ?variable
+                 (find-text-for-id gender.query)
+                 gender
                  (nth$ 1 ?answers)
                  ?answers
                  (translate-av ?answers)))
-                  
-;;; #####################
-;;; VALIDATE MODULE RULES 
-;;; #####################
-      
-(defrule VALIDATE::copy-rule
-   (declare (salience 10))
-   ?f <- (rule (validate no))
-   =>
-   (duplicate ?f (validate yes))
-   (modify ?f (validate done)))
 
-(defrule VALIDATE::next-condition
-   (declare (salience -10))
-   ?f <- (rule (name ?name) (validate yes)
-               (if ?a ?c ?v and $?rest))
-   =>
-   (modify ?f (if ?rest)))
+(defrule determine-age ""
+
+   (gender ?)
+   (not (age ?))
    
-(defrule VALIDATE::validation-complete
-   (declare (salience -10))
-   ?f <- (rule (validate yes) (if ? ? ?))
    =>
-   (retract ?f))
 
-;;; *******************
-;;; Validation - Syntax
-;;; *******************
+   (bind ?answers (create$ below17 bet17and55 above55))
+   (handle-state interview
+                 (find-text-for-id age.query)
+                 age
+                 (nth$ 1 ?answers)
+                 ?answers
+                 (translate-av ?answers)))
 
-(defrule VALIDATE::and-connector
-   ?f <- (rule (name ?name) (validate yes)
-               (if ?a ?c ?v ?connector&~and $?))
-   =>
-   (retract ?f)
-   (printout t "In rule " ?name ", if conditions must be connected using and:" crlf
-               "   " ?a " " ?c " " ?v " *" ?connector "*" crlf))
+(defrule determine-income ""
 
-(defrule VALIDATE::and-requires-additional-condition
-   ?f <- (rule (name ?name) (validate yes)
-               (if ?a ?c ?v and))
+   (age ?)
+   (not (income ?))
+   
    =>
-   (retract ?f)
-   (printout t "In rule " ?name ", an additional condition should follow the final and:" crlf
-               "   " ?a " " ?c " " ?v " and <missing condition>" crlf))
-               
-(defrule VALIDATE::incorrect-number-of-then-terms          
-   ?f <- (rule (name ?name) (validate yes)
-               (then $?terms&:(<> (length$ ?terms) 3)))
-   =>
-   (retract ?f)
-   (printout t "In rule " ?name ", then portion should be of the form <variable> is <value>:" crlf
-               "   " (implode$ ?terms) crlf))
+   
+   (bind ?answers (create$ below2k bet2kand7k above7k))
+   (handle-state interview
+                 (find-text-for-id income.query)
+                 income
+                 (nth$ 1 ?answers)
+                 ?answers
+                 (translate-av ?answers)))
+                 
+(defrule determine-marital ""
 
-(defrule VALIDATE::incorrect-number-of-if-terms          
-   ?f <- (rule (name ?name) (validate yes)
-               (if $?terms&:(< (length$ ?terms) 3)))
+   (age ?)
+   (income ?)
+   (not (marital ?))
+   
    =>
-   (retract ?f)
-   (printout t "In rule " ?name ", if portion contains an incomplete condition:" crlf
-               "   " (implode$ ?terms) crlf))
+   
+   (bind ?answers (create$ no yes))
+   (handle-state interview
+                 (find-text-for-id marital.query)
+                 marital
+                 (nth$ 1 ?answers)
+                 ?answers
+                 (translate-av ?answers)))
 
-(defrule VALIDATE::incorrect-then-term-syntax          
-   ?f <- (rule (name ?name) (validate yes)
-               (then ?a ?c&~is ?v))
-   =>
-   (retract ?f)
-   (printout t "In rule " ?name ", then portion should be of the form <variable> is <value>:" crlf
-               "   " ?a " " ?c " " ?v " " crlf))
+(defrule determine-smoking ""
 
-(defrule VALIDATE::incorrect-if-term-syntax          
-   ?f <- (rule (name ?name) (validate yes)
-               (if ?a ?c&~is ?v $?))
+   (age ?)
+   (income ?)
+   (marital ?)
+   (not (smoking ?))
+   
    =>
-   (retract ?f)
-   (printout t "In rule " ?name ", if portion comparator should be \"is\"" crlf
-               "   " ?a " " ?c " " ?v " " crlf))
-               
-(defrule VALIDATE::illegal-variable-value
-   ?f <- (rule (name ?name) (validate yes)
-               (if ?a ?c ?v $?))
-   (question (variable ?a) (valid-answers))
-   (legalanswers (values $?values))
-   (test (not (member$ ?v ?values)))
-   =>
-   (retract ?f)
-   (printout t "In rule " ?name ", the value " ?v " is not legal for variable " ?a ":" crlf
-               "   " ?a " " ?c " " ?v crlf))               
+   
+   (bind ?answers (create$ no yes))
+   (handle-state interview
+                 (find-text-for-id smoke.query)
+                 smoking
+                 (nth$ 1 ?answers)
+                 ?answers
+                 (translate-av ?answers)))
+                 
+;;;********************
+;;;* FACTS CF *
+;;;********************
 
-(defrule VALIDATE::reachable
-   (rule (name ?name) (validate yes)
-         (if ?a ?c ?v $?))
-   (not (question (variable ?a)))
-   (not (rule (then ?a $?)))
-   =>
-   (printout t "In rule " ?name " no question or rule could be found "
-               "that can supply a value for the variable " ?a ":" crlf
-               "   " ?a " " ?c " " ?v crlf))
+(defrule smoker ""
+    (declare (salience 99))
+    (smoking yes)
+    =>
+    (assert(current_fact (fact smoking) (cf 0.9)))
+)
+(defrule non-smoker ""
+    (declare (salience 99))
+    (smoking no)
+    =>
+    (assert(current_fact (fact smoking) (cf 0.8)))
+)
+(defrule is-man ""
+    (declare (salience 99))
+    (gender male)
+    =>
+    (assert(current_fact (fact gender) (cf 0.8)))
+)
+(defrule is-woman ""
+    (declare (salience 99))
+    (gender female)
+    =>
+    (assert(current_fact (fact gender) (cf 0.7)))
+)
+(defrule is-older-than-55 ""
+    (declare (salience 99))
+    (age above55)
+    =>
+    (assert(current_fact (fact age) (cf 0.8)))
+)
+(defrule is-mid-age ""
+    (declare (salience 99))
+    (age bet17and55)
+    =>
+    (assert(current_fact (fact age) (cf 0.7)))
+)
+(defrule is-young ""
+    (declare (salience 99))
+    (age below17)
+    =>
+    (assert(current_fact (fact age) (cf 0.2)))
+)
 
-(defrule VALIDATE::used "TBD lower salience"
-   ?f <- (rule (name ?name) (validate yes)
-               (then ?a is ?v))
-   (not (goal (variable ?a)))
-   (not (rule (if ?a ? ?v $?)))
+;;;********************
+;;;* CONCLUSIONS *
+;;;********************
+
+(defrule critical-care-conclusions ""
+   (declare (salience 99))
+   (current_fact (fact gender) (cf ?cf-g))
+   (current_fact (fact age) (cf ?cf-a))
+   (or(income bet2kand7k)(income above7k))
+   (marital ?)
+   (current_fact (fact smoking) (cf ?cf-s))
+   
    =>
-   (retract ?f)
-   (printout t "In rule " ?name " the conclusion for variable " ?a 
-               " is neither referenced by any rules nor the primary goal" crlf
-               "   " ?a " is " ?v crlf))
-               
-(defrule VALIDATE::variable-in-both-if-and-then
-   ?f <- (rule (name ?name) (validate yes)
-               (if ?a $?)
-               (then ?a is ?v))
+   
+   (assert (new_goal (goal criticalcare) (cf (* (min ?cf-s ?cf-g ?cf-a) 0.95))))
+   
+)
+
+(defrule high-cf-goal-exists ""
+    (current_goal (goal criticalcare) (cf ?cf-cc))
+    
    =>
-   (retract ?f)
-   (printout t "In rule " ?name " the variable " ?a 
-               " is used in both the if and then sections" crlf))
-                              
-(defrule VALIDATE::question-variable-unreferenced
-   (question (variable ?a) (query ?q))
-   (not (rule (validate done) (if $? ?a is ?v $?)))
+    (if (>= ?cf-cc 0.6)
+        then (handle-state conclusion (find-text-for-id criticalcare) ?cf-cc))
+)
+
+(defrule no-conclusions ""
+   (declare (salience -99))
+   (gender ?)
+   (age ?)
+   (income ?)
    =>
-   (printout t "The question \"" ?q "\", assigns a value to the variable " ?a 
-               " which is not referenced by any rules" crlf))
+   (handle-state conclusion (find-text-for-id none) 0)
+)

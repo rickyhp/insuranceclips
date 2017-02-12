@@ -5,6 +5,10 @@
    (id InsuranceExpert)
    (text "GE Life Health Insurance Expert System"))
 (text-for-id
+   (id WelcomeMessage)
+   (text "Welcome. Please click Next button."))
+   
+(text-for-id
    (id no)
    (text "no"))
 (text-for-id 
@@ -19,17 +23,49 @@
 (text-for-id 
    (id Restart)
    (text "Restart"))
-(text-for-id
-   (id WelcomeMessage)
-   (text "Welcome. Please click Next button."))
+(text-for-id 
+   (id male)
+   (text "Male"))
+(text-for-id 
+   (id female)
+   (text "Female"))
+(text-for-id 
+   (id below17)
+   (text "Below 17"))
+(text-for-id 
+   (id bet17and55)
+   (text "Between 17 and 55"))
+(text-for-id 
+   (id above55)
+   (text "Above 55"))
+(text-for-id 
+   (id below2k)
+   (text "Below SGD 2000 per month"))
+(text-for-id 
+   (id bet2kand7k)
+   (text "Between SGD 2000 and SGD 7000 per month"))
+(text-for-id 
+   (id above7k)
+   (text "More than SGD 7000 per month"))
+   
 
 ;; Questions
 (text-for-id
    (id age.query)
-   (text "Please specify your age, 1) below 17, 2) between 17 and 55, 3) above 55 ?"))
+   (text "Please tell us your age range"))
 (text-for-id
    (id income.query)
-   (text "Do you have stable income?"))
+   (text "Please indicate your income range"))
+(text-for-id
+   (id gender.query)
+   (text "What is your gender?"))
+(text-for-id
+   (id marital.query)
+   (text "Are you married?"))
+(text-for-id
+   (id smoke.query)
+   (text "Are you smoking?"))
+   
 
 ;; Answers
 (text-for-id

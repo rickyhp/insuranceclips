@@ -51,7 +51,6 @@ $factfilename = $ffh->filename;
 ##################################
 
 say $bfh '(load* insurance_main.clp)';
-say $bfh '(load* insurancecgi.clp)';
 say $bfh '(reset)';
 say $bfh '(load-facts insurance_en.fct)';
 
@@ -93,7 +92,7 @@ if ($q->param('Next'))
    
    if ($variable and $answer)
      { 
-      my $newVar = "(variable (name $variable) (value $answer))";
+      my $newVar = "($variable $answer)";
       
       push @variableArray , $newVar;
       
@@ -160,7 +159,7 @@ foreach (@output)
 
 print $q->header;
                     
-print $q->start_html('insurance'); 
+print $q->start_html('Insurance Expert'); 
       
 #<noscript>Your browser does not support JavaScript!</noscript>
 print $q->noscript('Your browser does not support JavaScript!');
@@ -186,14 +185,17 @@ if ($info{variable})
                     -override => 1);
   }
 
-print $q->start_table({-border=>0,-cellpadding=>'10',-width=>'300'});
+print $q->start_table({-border=>0,-cellpadding=>'10',-width=>'400'});
 
 print $q->Tr({-align=>'CENTER',-valign=>'MIDDLE',-height => '50'},
-             $q->td($q->h2($info{insuranceExpertLabel})));
+             $q->td($q->h2($info{autoDemoLabel})));
 
 print $q->Tr({-align=>'CENTER',-valign=>'MIDDLE',-height => '50'},
              $q->td($info{display}));
 
+print $q->Tr({-align=>'CENTER',-valign=>'MIDDLE',-height => '50'},
+             $q->td($info{cf}));
+             
 if ($info{displayAnswers})
   {
    my @returnAnswers = split(/:/, $info{validAnswers});
@@ -211,9 +213,8 @@ if ($info{displayAnswers})
         { $defaultValue = $prevAnswer; }
       else
         { $defaultValue = $returnAnswers[0]; }
-      
-      if($info{variable} eq 'income'){
-        print $q->Tr({-align=>'CENTER',-valign=>'MIDDLE'},
+        
+      print $q->Tr({-align=>'CENTER',-valign=>'MIDDLE'},
                    $q->td({-height => '50' },
                           $q->radio_group({-name => 'answer' ,
                                            -values => \@returnAnswers ,
@@ -221,16 +222,6 @@ if ($info{displayAnswers})
                                            -override => 1 ,
                                            -default => $defaultValue ,
                                            -linebreak => 'true'})));
-      }else{
-        print $q->Tr({-align=>'CENTER',-valign=>'MIDDLE'},
-                   $q->td({-height => '50' },
-                        $q->textfield(-name => 'answer',
-                                           -default => '',
-                                           -size => 10,
-                                           -maxlength => 10,
-                                           -override => 1)));
-      }
-                        
      }
    elsif (@returnAnswers == 1)
      {
@@ -279,7 +270,7 @@ print $q->end_form;
 #####################################
 
  print $q->h2('CLIPS Output');
- 
+
  if ($info{state})
    { print $q->p('state = ' . $info{state}); }
  
@@ -292,6 +283,12 @@ print $q->end_form;
  if ($info{validAnswers})
    { print $q->p('validAnswers = ' . $info{validAnswers}); }
  
+ if ($info{displayAnswers})
+   { print $q->p('displayAnswers = ' . $info{displayAnswers}); }
+
+ if ($info{cf})
+   { print $q->p('cf = ' . $info{cf}); }
+   
  if ($info{displayAnswers})
    { print $q->p('displayAnswers = ' . $info{displayAnswers}); }
    
