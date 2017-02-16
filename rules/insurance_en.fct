@@ -47,8 +47,42 @@
 (text-for-id 
    (id above7k)
    (text "More than SGD 7000 per month"))
-   
+(text-for-id 
+   (id singaporean)
+   (text "Singaporean"))  
+(text-for-id 
+   (id pr)
+   (text "PR"))  
+(text-for-id 
+   (id foreigner)
+   (text "Foreigner"))
+(text-for-id 
+   (id chinese)
+   (text "Chinese"))   
+(text-for-id 
+   (id malay)
+   (text "Malay"))
+(text-for-id 
+   (id indian)
+   (text "Indian"))
+(text-for-id 
+   (id caucasian)
+   (text "Caucasian"))
+(text-for-id 
+   (id others)
+   (text "Others"))
+(text-for-id 
+   (id everyday)
+   (text "Everyday"))
+(text-for-id 
+   (id onceortwice)
+   (text "Once or twice"))
+(text-for-id 
+   (id seldom)
+   (text "Maybe once"))
 
+   
+   
 ;; Questions
 (text-for-id
    (id age.query)
@@ -65,9 +99,22 @@
 (text-for-id
    (id smoke.query)
    (text "Are you smoking?"))
-   
+(text-for-id
+   (id citizenship.query)
+   (text "What is your citizenship?"))
+(text-for-id
+   (id race.query)
+   (text "What is your race?"))   
+(text-for-id
+   (id drinkhabits.query)
+   (text "How often do you drink alcohol (in a week)?"))  
+(text-for-id
+   (id travelhabits.query)
+   (text "How often do you travel to other countries (in a month)?"))  
 
-;; Answers
+
+
+;; Recommendations
 (text-for-id
    (id criticalcare)
    (text "Critical Care Advantage Plan"))

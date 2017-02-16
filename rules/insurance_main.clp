@@ -289,6 +289,85 @@
                  ?answers
                  (translate-av ?answers)))
                  
+(defrule determine-citizenship ""
+
+   (age ?)
+   (income ?)
+   (marital ?)
+   (smoking ?)
+   (not (citizenship ?))
+   
+   =>
+   
+   (bind ?answers (create$ singaporean pr foreigner))
+   (handle-state interview
+                 (find-text-for-id citizenship.query)
+                 citizenship
+                 (nth$ 1 ?answers)
+                 ?answers
+                 (translate-av ?answers)))
+
+(defrule determine-race ""
+
+   (age ?)
+   (income ?)
+   (marital ?)
+   (smoking ?)
+   (citizenship ?)
+   (not (race ?))
+   
+   =>
+   
+   (bind ?answers (create$ chinese malay indian caucasian others))
+   (handle-state interview
+                 (find-text-for-id race.query)
+                 race
+                 (nth$ 1 ?answers)
+                 ?answers
+                 (translate-av ?answers)))
+
+(defrule drinking-habits ""
+
+   (age ?)
+   (income ?)
+   (marital ?)
+   (smoking ?)
+   (citizenship ?)
+   (race ?)
+   (not (drinkhabits ?))
+   
+   =>
+   
+   (bind ?answers (create$ everyday onceortwice seldom no))
+   (handle-state interview
+                 (find-text-for-id drinkhabits.query)
+                 drinkhabits
+                 (nth$ 1 ?answers)
+                 ?answers
+                 (translate-av ?answers)))
+
+(defrule travel-habits ""
+
+   (age ?)
+   (income ?)
+   (marital ?)
+   (smoking ?)
+   (citizenship ?)
+   (race ?)
+   (drinkhabits ?)
+   (not (travelhabits ?))
+   
+   =>
+   
+   (bind ?answers (create$ everyday onceortwice seldom no))
+   (handle-state interview
+                 (find-text-for-id travelhabits.query)
+                 travelhabits
+                 (nth$ 1 ?answers)
+                 ?answers
+                 (translate-av ?answers)))
+                 
+                 
 ;;;********************
 ;;;* FACTS CF *
 ;;;********************
@@ -335,6 +414,55 @@
     =>
     (assert(current_fact (fact age) (cf 0.2)))
 )
+(defrule is-drink-everyday ""
+    (declare (salience 99))
+    (drinkhabits everyday)
+    =>
+    (assert(current_fact (fact drinkhabits) (cf 0.9)))
+)
+(defrule is-drink-sometimes ""
+    (declare (salience 99))
+    (drinkhabits onceortwice)
+    =>
+    (assert(current_fact (fact drinkhabits) (cf 0.8)))
+)
+(defrule is-drink-seldom ""
+    (declare (salience 99))
+    (drinkhabits seldom)
+    =>
+    (assert(current_fact (fact drinkhabits) (cf 0.7)))
+)
+(defrule is-drink-no ""
+    (declare (salience 99))
+    (drinkhabits no)
+    =>
+    (assert(current_fact (fact drinkhabits) (cf 0.6)))
+)
+(defrule is-travel-everyday ""
+    (declare (salience 99))
+    (travelhabits everyday)
+    =>
+    (assert(current_fact (fact travelhabits) (cf 0.8)))
+)
+(defrule is-travel-sometimes ""
+    (declare (salience 99))
+    (travelhabits onceortwice)
+    =>
+    (assert(current_fact (fact travelhabits) (cf 0.7)))
+)
+(defrule is-travel-seldom ""
+    (declare (salience 99))
+    (travelhabits seldom)
+    =>
+    (assert(current_fact (fact travelhabits) (cf 0.6)))
+)
+(defrule is-travel-no ""
+    (declare (salience 99))
+    (travelhabits no)
+    =>
+    (assert(current_fact (fact travelhabits) (cf 0.6)))
+)
+
 
 ;;;********************
 ;;;* CONCLUSIONS *
@@ -346,11 +474,15 @@
    (current_fact (fact age) (cf ?cf-a))
    (or(income bet2kand7k)(income above7k))
    (marital ?)
+   (citizenship ?)
+   (race ?)
+   (current_fact (fact drinkhabits) (cf ?cf-d))
+   (current_fact (fact travelhabits) (cf ?cf-t))
    (current_fact (fact smoking) (cf ?cf-s))
    
    =>
    
-   (assert (new_goal (goal criticalcare) (cf (* (min ?cf-s ?cf-g ?cf-a) 0.95))))
+   (assert (new_goal (goal criticalcare) (cf (* (min ?cf-s ?cf-g ?cf-a ?cf-d ?cf-t) 0.95))))
    
 )
 
@@ -358,7 +490,7 @@
     (current_goal (goal criticalcare) (cf ?cf-cc))
     
    =>
-    (if (>= ?cf-cc 0.6)
+    (if (>= ?cf-cc 0.5)
         then (handle-state conclusion (find-text-for-id criticalcare) ?cf-cc))
 )
 
@@ -367,6 +499,12 @@
    (gender ?)
    (age ?)
    (income ?)
+   (marital ?)
+   (citizenship ?)
+   (race ?)
+   (drinkhabits ?)
+   (smoking ?)
+   (travelhabits ?)
    =>
    (handle-state conclusion (find-text-for-id none) 0)
 )
