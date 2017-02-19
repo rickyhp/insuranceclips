@@ -261,6 +261,7 @@
    (age ?)
    (income ?)
    (not (marital ?))
+   (not (no-conclusion ?))
    
    =>
    
@@ -467,7 +468,6 @@
 ;;;********************
 ;;;* CONCLUSIONS *
 ;;;********************
-
 (defrule critical-care-conclusions ""
    (declare (salience 99))
    (current_fact (fact gender) (cf ?cf-g))
@@ -481,9 +481,17 @@
    (current_fact (fact smoking) (cf ?cf-s))
    
    =>
-   
    (assert (new_goal (goal criticalcare) (cf (* (min ?cf-s ?cf-g ?cf-a ?cf-d ?cf-t) 0.95))))
    
+)
+
+;;; if income below 2k, no need to recommend critical care adv
+(defrule less-income-conclusions ""
+   (declare (salience 98))
+   (income below2k)
+   
+   =>
+   (assert (no-conclusion true))
 )
 
 (defrule high-cf-goal-exists ""
@@ -496,15 +504,7 @@
 
 (defrule no-conclusions ""
    (declare (salience -99))
-   (gender ?)
-   (age ?)
-   (income ?)
-   (marital ?)
-   (citizenship ?)
-   (race ?)
-   (drinkhabits ?)
-   (smoking ?)
-   (travelhabits ?)
+   (no-conclusion true)
    =>
    (handle-state conclusion (find-text-for-id none) 0)
 )
