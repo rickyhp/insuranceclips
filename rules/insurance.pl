@@ -193,8 +193,11 @@ print $q->Tr({-align=>'CENTER',-valign=>'MIDDLE',-height => '50'},
 print $q->Tr({-align=>'CENTER',-valign=>'MIDDLE',-height => '50'},
              $q->td($info{display}));
 
-print $q->Tr({-align=>'CENTER',-valign=>'MIDDLE',-height => '50'},
-             $q->td($info{cf}));
+if ($info{state} eq "conclusion")
+{
+    print $q->Tr({-align=>'CENTER',-valign=>'MIDDLE',-height => '50'},
+             $q->td("Certainty Factor (" . $info{cf} . ")"));
+}
              
 if ($info{displayAnswers})
   {

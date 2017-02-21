@@ -327,7 +327,8 @@
                  ?answers
                  (translate-av ?answers)))
 
-(defrule drinking-habits ""
+;;; Hospitalization Plan
+(defrule have-hospitalization-plan-qn ""
 
    (age ?)
    (income ?)
@@ -335,6 +336,106 @@
    (smoking ?)
    (citizenship ?)
    (race ?)
+   (not (have-hospitalization-plan-ans ?))
+=>	
+   (bind ?answers (create$ yes no))
+   (handle-state interview
+                 (find-text-for-id hospital-plan.query)
+                 have-hospitalization-plan-ans
+                 (nth$ 1 ?answers)
+                 ?answers
+                 (translate-av ?answers)))
+
+;;; Have hospitalization plan = Yes
+(defrule have-hospitalization-plan-yes
+   (age ?)
+   (income ?)
+   (marital ?)
+   (smoking ?)
+   (citizenship ?)
+   (race ?)
+   (have-hospitalization-plan-ans yes)
+   (not (view-other-plans-ans ?))
+=>	
+   (bind ?answers (create$ yes no))
+   (handle-state interview
+                 (find-text-for-id view-other-plans.query)
+                 view-other-plans-ans
+                 (nth$ 1 ?answers)
+                 ?answers
+                 (translate-av ?answers)))
+
+;;; Do you prefer just the standard hospitalization plan or do you prefer a more holistic hospitalization plan?
+(defrule standard-vs-holistic-qn
+    (or(have-hospitalization-plan-ans no)(view-other-plans-ans yes))
+    (not (standard-vs-holistic-ans ?))
+=>	
+    (bind ?answers (create$ standard holistic))
+    (handle-state interview
+                 (find-text-for-id stan-vs-holistic-qn.query)
+                 standard-vs-holistic-ans
+                 (nth$ 1 ?answers)
+                 ?answers
+                 (translate-av ?answers)))
+
+;;; In the event you are warded, do you prefer private or public hospitals?
+(defrule private-vs-public-qn
+	(standard-vs-holistic-ans holistic)
+    (not (private-vs-public-ans ?))
+=>	
+    (bind ?answers (create$ private public anything))
+    (handle-state interview
+                 (find-text-for-id private-vs-public-qn.query)
+                 private-vs-public-ans
+                 (nth$ 1 ?answers)
+                 ?answers
+                 (translate-av ?answers)))
+
+;;; Do you prefer Class B1 wards or Class A wards?
+(defrule B1-vs-A-qn
+	(private-vs-public-ans public)
+    (not(B1-vs-A-ans ?))
+=>	
+    (bind ?answers (create$ classb1 classa anything))
+    (handle-state interview
+                 (find-text-for-id B1-vs-A-qn.query)
+                 B1-vs-A-ans
+                 (nth$ 1 ?answers)
+                 ?answers
+                 (translate-av ?answers)))
+
+;;; How much S$ per day do you want in the event of confinement in community hospital?
+(defrule confinement-in-community-hospital-qn
+	(or (private-vs-public-ans anything) (B1-vs-A-ans anything))
+    (not (confinement-in-community-hospital-ans ?))
+=>	
+    (bind ?answers (create$ low moderate high anything))
+    (handle-state interview
+                 (find-text-for-id confinement-in-community-hospital-qn.query)
+                 confinement-in-community-hospital-ans
+                 (nth$ 1 ?answers)
+                 ?answers
+                 (translate-av ?answers))
+)
+
+;;; How much S$ per period do you want in the event of diagnose with congenital abnormalities?
+(defrule congenital-abnormalities-qn
+	(confinement-in-community-hospital-ans anything)
+    (not (congenital-abnormalities-ans ?))
+=>	
+    (bind ?answers (create$ low moderate high anything))
+    (handle-state interview
+                 (find-text-for-id congenital-abnormalities-qn.query)
+                 congenital-abnormalities-ans
+                 (nth$ 1 ?answers)
+                 ?answers
+                 (translate-av ?answers))
+)
+    
+;;; Critical care Plan
+(defrule drinking-habits ""
+
+   (view-other-plans-ans yes)
    (not (drinkhabits ?))
    
    =>
@@ -349,12 +450,6 @@
 
 (defrule travel-habits ""
 
-   (age ?)
-   (income ?)
-   (marital ?)
-   (smoking ?)
-   (citizenship ?)
-   (race ?)
    (drinkhabits ?)
    (not (travelhabits ?))
    
@@ -367,8 +462,10 @@
                  (nth$ 1 ?answers)
                  ?answers
                  (translate-av ?answers)))
-                 
-                 
+
+
+
+
 ;;;********************
 ;;;* FACTS CF *
 ;;;********************
@@ -468,6 +565,23 @@
 ;;;********************
 ;;;* CONCLUSIONS *
 ;;;********************
+
+(defrule view-other-plans-no ""
+   (view-other-plans-ans no)
+   
+   =>
+   (assert (no-conclusion true))
+)
+
+;;; Standard vs. Holistic --> Standard
+(defrule standard-hospitalization-plan-conclusions
+	(standard-vs-holistic-ans standard)
+=>	
+    (assert (new_goal (goal supreme-health-standard) (cf 1.0)))
+)
+    
+
+;;; critical illness plan
 (defrule critical-care-conclusions ""
    (declare (salience 99))
    (current_fact (fact gender) (cf ?cf-g))
@@ -481,6 +595,7 @@
    (current_fact (fact smoking) (cf ?cf-s))
    
    =>
+   
    (assert (new_goal (goal criticalcare) (cf (* (min ?cf-s ?cf-g ?cf-a ?cf-d ?cf-t) 0.95))))
    
 )
@@ -494,14 +609,26 @@
    (assert (no-conclusion true))
 )
 
-(defrule high-cf-goal-exists ""
-    (current_goal (goal criticalcare) (cf ?cf-cc))
-    
+
+
+;;; deterimine highest CF product
+(defrule supreme-health-standard-exists ""
+       (current_goal (goal supreme-health-standard) (cf ?cf-shs))
    =>
-    (if (>= ?cf-cc 0.5)
-        then (handle-state conclusion (find-text-for-id criticalcare) ?cf-cc))
+       (if (>= ?cf-shs 0.5) then
+            (handle-state conclusion (find-text-for-id supreme-health-standard) ?cf-shs)
+       )
 )
 
+(defrule critical-care-exists ""
+       (current_goal (goal criticalcare) (cf ?cf-cc))
+   =>
+       (if (>= ?cf-cc 0.5) then
+            (handle-state conclusion (find-text-for-id criticalcare) ?cf-cc)
+       )
+)
+
+;;; no recommendations
 (defrule no-conclusions ""
    (declare (salience -99))
    (no-conclusion true)

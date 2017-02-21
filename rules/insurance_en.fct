@@ -80,9 +80,38 @@
 (text-for-id 
    (id seldom)
    (text "Maybe once"))
+(text-for-id 
+   (id standard)
+   (text "Standard"))
+(text-for-id 
+   (id holistic)
+   (text "Holistic"))
+(text-for-id 
+   (id private)
+   (text "Private"))
+(text-for-id 
+   (id public)
+   (text "Public"))
+(text-for-id 
+   (id anything)
+   (text "Anything"))
+(text-for-id 
+   (id classb1)
+   (text "B1"))
+(text-for-id 
+   (id classa)
+   (text "A"))
+(text-for-id 
+   (id low)
+   (text "Low"))
+(text-for-id 
+   (id moderate)
+   (text "Moderate"))
+(text-for-id 
+   (id high)
+   (text "High"))
 
-   
-   
+
 ;; Questions
 (text-for-id
    (id age.query)
@@ -111,13 +140,40 @@
 (text-for-id
    (id travelhabits.query)
    (text "How often do you travel to other countries (in a month)?"))  
+(text-for-id
+   (id hospital-plan.query)
+   (text "Do you currently have hospitalization plan?"))  
+(text-for-id
+   (id view-other-plans.query)
+   (text "Do you want to consider other health insurance plans?"))  
+(text-for-id
+   (id stan-vs-holistic-qn.query)
+   (text "Do you prefer just the standard hospitalization plan or do you prefer a more holistic hospitalization plan?"))  
+(text-for-id
+   (id private-vs-public-qn.query)
+   (text "In the event you are warded, do you prefer private or public hospitals?"))
+(text-for-id
+   (id B1-vs-A-qn.query)
+   (text "Do you prefer Class B1 wards or Class A wards?"))
+(text-for-id
+   (id confinement-in-community-hospital-qn.query)
+   (text "How much S$ per day do you want in the event of confinement in community hospital?"))
+(text-for-id
+   (id congenital-abnormalities-qn.query)
+   (text "How much S$ per period do you want in the event of diagnose with congenital abnormalities?"))
+
+
+
 
 
 
 ;; Recommendations
 (text-for-id
    (id criticalcare)
-   (text "Critical Care Advantage Plan"))
+   (text "Recommended : Critical Care Advantage Plan"))
+(text-for-id
+   (id supreme-health-standard)
+   (text "Recommended : Supreme Health Standard Plan"))
 (text-for-id
    (id none)
    (text "Sorry, we do not have any recommendation for you."))
