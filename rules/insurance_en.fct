@@ -192,6 +192,11 @@
    (id supreme-health-standard)
    (text "Recommended : Supreme Health Standard Plan"))
 (text-for-id
+   (id supreme-health-standard-criticalcare)
+   (text "Recommended : Supreme Health Standard Plan and Critical Care Advantage Plan"))
+   
+
+(text-for-id
    (id none)
    (text "Sorry, we do not have any recommendation for you."))
 

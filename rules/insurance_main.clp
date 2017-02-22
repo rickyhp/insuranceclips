@@ -348,12 +348,6 @@
 
 ;;; View other plans
 (defrule have-hospitalization-plan-yes
-   (age ?)
-   (income ?)
-   (marital ?)
-   (smoking ?)
-   (citizenship ?)
-   (race ?)
    (have-hospitalization-plan-ans yes)
    (not (view-other-plans-ans ?))
 =>	
@@ -505,6 +499,9 @@
 
 
 
+
+
+
 ;;; Do you want to see additional benefits on top of your hospitalization plan?
 ;;; go to critical care
 (defrule additional-plan-qn
@@ -650,13 +647,29 @@
 )
 
 ;;; All Low - B1 Plus CF
-(defrule B1
+(defrule class-B1
 	(or (or (or (or (or (B1-vs-A-ans classb1) (confinement-in-community-hospital-ans low)) (congenital-abnormalities-ans low)) (organ-transplant-ans low)) (psychiatric-treatment-ans low)) (final-expenses-benefit low))
 =>	
     (assert (supreme-medicash start))
 	(assert (current_fact (fact supreme-health-B-plus) (cf 0.6)))
 )
 
+;;; All Moderate - A Plus CF
+(defrule class-A
+	(or (or (or (or (or (B1-vs-A-ans A) (confinement-in-community-hospital-ans Moderate)) (congenital-abnormalities-ans Moderate)) (organ-transplant-ans Moderate)) (psychiatric-treatment-ans Moderate)) (final-expenses-benefit Moderate))
+=>	
+    (assert (supreme-medicash start))
+	(assert (current_fact (fact supreme-health-A-plus) (cf 0.6)))
+)
+    
+;;; All High - P Plus CF
+(defrule class-P
+	(or (or (or (or (or (private-vs-public-ans private) (confinement-in-community-hospital-ans high)) (congenital-abnormalities-ans high)) (organ-transplant-ans high)) (psychiatric-treatment-ans high)) (final-expenses-benefit high))
+=>	
+    (assert (supreme-medicash start))
+	(assert (current_fact (fact supreme-health-P-plus) (cf 0.6)))
+)
+    
 ;;;********************
 ;;;* CONCLUSIONS *
 ;;;********************
@@ -670,31 +683,37 @@
 
 ;;; Standard vs. Holistic --> Standard
 (defrule standard-hospitalization-plan-conclusions
-	(standard-vs-holistic-ans standard)
+	(standard-vs-holistic-ans ?)
     (additional-plan-ans no)
    =>	
     (assert (new_goal (goal supreme-health-standard) (cf 1.0)))
 )
     
+;;; Supreme Health and Critical Care
+(defrule supremehealth-criticalcare-conclusions
+	(current_fact (fact gender) (cf ?cf-g))
+    (current_fact (fact age) (cf ?cf-a))
+    (or(income bet2kand7k)(income above7k))
+    (marital ?)
+    (citizenship ?)
+    (race ?)
+    (current_fact (fact drinkhabits) (cf ?cf-d))
+    (current_fact (fact travelhabits) (cf ?cf-t))
+    (current_fact (fact smoking) (cf ?cf-s))
+    (standard-vs-holistic-ans ?)
+    (additional-plan-ans yes)
+    
+   =>	
+    
+    (assert (new_goal (goal supreme-health-standard-criticalcare) (cf (* (min ?cf-s ?cf-g ?cf-a ?cf-d ?cf-t) 0.95))))
+)
 
 ;;; critical illness plan
-(defrule critical-care-conclusions ""
-   (declare (salience 99))
-   (current_fact (fact gender) (cf ?cf-g))
-   (current_fact (fact age) (cf ?cf-a))
-   (or(income bet2kand7k)(income above7k))
-   (marital ?)
-   (citizenship ?)
-   (race ?)
-   (current_fact (fact drinkhabits) (cf ?cf-d))
-   (current_fact (fact travelhabits) (cf ?cf-t))
-   (current_fact (fact smoking) (cf ?cf-s))
-   
-   =>
-   
-   (assert (new_goal (goal criticalcare) (cf (* (min ?cf-s ?cf-g ?cf-a ?cf-d ?cf-t) 0.95))))
-   
-)
+;;;(defrule critical-care-conclusions ""
+;;;   (declare (salience 99))
+;;;   =>
+;;;   (assert (new_goal (goal criticalcare) (cf 1.0)))
+;;;)
 
 ;;; if income below 2k, no need to recommend critical care adv
 (defrule less-income-conclusions ""
@@ -705,7 +724,7 @@
    (assert (no-conclusion true))
 )
 
-;;; deterimine highest CF product
+;;; Supreme Health Standard
 (defrule supreme-health-standard-exists ""
        (current_goal (goal supreme-health-standard) (cf ?cf-shs))
    =>
@@ -714,21 +733,19 @@
        )
 )
 
-(defrule critical-care-exists ""
-       (current_goal (goal criticalcare) (cf ?cf-cc))
-   =>
-       (if (>= ?cf-cc 0.5) then
-            (handle-state conclusion (find-text-for-id criticalcare) ?cf-cc)
-       )
-)
-
-;;;(defrule health-criticalcare-exists ""
-   ;;;    (current_goal (goal supreme-health-standard) (cf ?cf-shs))
-      ;;;(current_goal (goal criticalcare) (cf ?cf-cc))
-   ;;;=>
-    ;;;find-text-for-id supreme-health-standard find-text-for-id criticalcare
-      ;;; (handle-state conclusion (str-cat "health and critical care") (cf (* (min ?cf-shs ?cf-cc) 1.0)))
+;;;(defrule critical-care-exists ""
+;;;       (current_goal (goal criticalcare) (cf ?cf-cc))
+;;;   =>
+;;;       (if (>= ?cf-cc 0.5) then
+;;;            (handle-state conclusion (find-text-for-id criticalcare) ?cf-cc)
+;;;       )
 ;;;)
+
+(defrule health-criticalcare-exists ""
+       (current_goal (goal supreme-health-standard-criticalcare) (cf ?cf-shscc))
+   =>
+       (handle-state conclusion (find-text-for-id supreme-health-standard-criticalcare) ?cf-shscc)
+)
 
 ;;; no recommendations
 (defrule no-conclusions ""
