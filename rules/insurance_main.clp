@@ -346,7 +346,7 @@
                  ?answers
                  (translate-av ?answers)))
 
-;;; Have hospitalization plan = Yes
+;;; View other plans
 (defrule have-hospitalization-plan-yes
    (age ?)
    (income ?)
@@ -406,7 +406,8 @@
 
 ;;; How much S$ per day do you want in the event of confinement in community hospital?
 (defrule confinement-in-community-hospital-qn
-	(or (private-vs-public-ans anything) (B1-vs-A-ans anything))
+	(or (private-vs-public-ans ?) (B1-vs-A-ans ?))
+    (B1-vs-A-ans ?)
     (not (confinement-in-community-hospital-ans ?))
 =>	
     (bind ?answers (create$ low moderate high anything))
@@ -420,7 +421,7 @@
 
 ;;; How much S$ per period do you want in the event of diagnose with congenital abnormalities?
 (defrule congenital-abnormalities-qn
-	(confinement-in-community-hospital-ans anything)
+	(confinement-in-community-hospital-ans ?)
     (not (congenital-abnormalities-ans ?))
 =>	
     (bind ?answers (create$ low moderate high anything))
@@ -431,11 +432,98 @@
                  ?answers
                  (translate-av ?answers))
 )
-    
+
+;;; How much S$ do you want per living organ donor transplant?
+(defrule organ-transplant-qn
+	(congenital-abnormalities-ans ?)
+    (not (organ-transplant-ans ?))
+=>	
+    (bind ?answers (create$ low moderate high anything))
+    (handle-state interview
+                 (find-text-for-id organ-transplant-qn.query)
+                 organ-transplant-ans
+                 (nth$ 1 ?answers)
+                 ?answers
+                 (translate-av ?answers))
+)
+
+;;; How much S$ do you want in the event of psychiatric treatment?
+(defrule psychiatric-treatment-qn
+	(organ-transplant-ans ?)
+    (not (psychiatric-treatment-ans ?))
+=>	
+    (bind ?answers (create$ low moderate high anything))
+    (handle-state interview
+                 (find-text-for-id psychiatric-treatment-qn.query)
+                 psychiatric-treatment-ans
+                 (nth$ 1 ?answers)
+                 ?answers
+                 (translate-av ?answers))
+)
+
+;;; How much final expenses benefit do you want?
+(defrule final-expenses-benefit-qn
+	(psychiatric-treatment-ans ?)
+    (not (final-expenses-benefit-ans ?))
+=>	
+    (bind ?answers (create$ low moderate high anything))
+    (handle-state interview
+                 (find-text-for-id final-expenses-benefit-qn.query)
+                 final-expenses-benefit-ans
+                 (nth$ 1 ?answers)
+                 ?answers
+                 (translate-av ?answers))
+)
+
+;;; How much annual benefit limit do you want?
+(defrule annual-benefit-limit-qn
+	(final-expenses-benefit-ans ?)
+    (not (annual-benefit-limit-ans ?))
+=>	
+    (bind ?answers (create$ low moderate high anything))
+    (handle-state interview
+                 (find-text-for-id annual-benefit-limit-qn.query)
+                 annual-benefit-limit-ans
+                 (nth$ 1 ?answers)
+                 ?answers
+                 (translate-av ?answers))
+)
+                 
+;;; Do you want additional cash to complement your hospitalization plan?
+(defrule additional-cash-qn
+	(supreme-medicash start)
+    (not (additional-cash-ans ?))
+=>	
+	(bind ?answers (create$ yes no))
+    (handle-state interview
+                 (find-text-for-id additional-cash-qn.query)
+                 additional-cash-ans
+                 (nth$ 1 ?answers)
+                 ?answers
+                 (translate-av ?answers))
+)
+
+
+
+;;; Do you want to see additional benefits on top of your hospitalization plan?
+;;; go to critical care
+(defrule additional-plan-qn
+	(standard-vs-holistic-ans standard)
+    (not (additional-plan-ans ?))
+=>	
+	(bind ?answers (create$ yes no))
+    (handle-state interview
+                 (find-text-for-id additional-plan-qn.query)
+                 additional-plan-ans
+                 (nth$ 1 ?answers)
+                 ?answers
+                 (translate-av ?answers))
+)
+
 ;;; Critical care Plan
 (defrule drinking-habits ""
 
-   (view-other-plans-ans yes)
+   (additional-plan-ans yes)
    (not (drinkhabits ?))
    
    =>
@@ -561,6 +649,13 @@
     (assert(current_fact (fact travelhabits) (cf 0.6)))
 )
 
+;;; All Low - B1 Plus CF
+(defrule B1
+	(or (or (or (or (or (B1-vs-A-ans classb1) (confinement-in-community-hospital-ans low)) (congenital-abnormalities-ans low)) (organ-transplant-ans low)) (psychiatric-treatment-ans low)) (final-expenses-benefit low))
+=>	
+    (assert (supreme-medicash start))
+	(assert (current_fact (fact supreme-health-B-plus) (cf 0.6)))
+)
 
 ;;;********************
 ;;;* CONCLUSIONS *
@@ -576,7 +671,8 @@
 ;;; Standard vs. Holistic --> Standard
 (defrule standard-hospitalization-plan-conclusions
 	(standard-vs-holistic-ans standard)
-=>	
+    (additional-plan-ans no)
+   =>	
     (assert (new_goal (goal supreme-health-standard) (cf 1.0)))
 )
     
@@ -609,8 +705,6 @@
    (assert (no-conclusion true))
 )
 
-
-
 ;;; deterimine highest CF product
 (defrule supreme-health-standard-exists ""
        (current_goal (goal supreme-health-standard) (cf ?cf-shs))
@@ -627,6 +721,14 @@
             (handle-state conclusion (find-text-for-id criticalcare) ?cf-cc)
        )
 )
+
+;;;(defrule health-criticalcare-exists ""
+   ;;;    (current_goal (goal supreme-health-standard) (cf ?cf-shs))
+      ;;;(current_goal (goal criticalcare) (cf ?cf-cc))
+   ;;;=>
+    ;;;find-text-for-id supreme-health-standard find-text-for-id criticalcare
+      ;;; (handle-state conclusion (str-cat "health and critical care") (cf (* (min ?cf-shs ?cf-cc) 1.0)))
+;;;)
 
 ;;; no recommendations
 (defrule no-conclusions ""

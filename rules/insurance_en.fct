@@ -161,9 +161,26 @@
 (text-for-id
    (id congenital-abnormalities-qn.query)
    (text "How much S$ per period do you want in the event of diagnose with congenital abnormalities?"))
+(text-for-id
+   (id organ-transplant-qn.query)
+   (text "How much S$ do you want per living organ donor transplant?"))
+(text-for-id
+   (id psychiatric-treatment-qn.query)
+   (text "How much S$ do you want in the event of psychiatric treatment?"))
+(text-for-id
+   (id final-expenses-benefit-qn.query)
+   (text "How much final expenses benefit do you want?"))
+(text-for-id
+   (id annual-benefit-limit-qn.query)
+   (text "How much annual benefit limit do you want?"))  
+(text-for-id
+   (id additional-cash-qn.query)
+   (text "Do you want additional cash to complement your hospitalization plan?"))
 
 
-
+(text-for-id
+   (id additional-plan-qn.query)
+   (text "Do you want to see additional benefits on top of your hospitalization plan?"))
 
 
 
