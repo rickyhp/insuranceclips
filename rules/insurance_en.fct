@@ -110,7 +110,15 @@
 (text-for-id 
    (id high)
    (text "High"))
-
+(text-for-id 
+   (id one)
+   (text "1"))
+(text-for-id 
+   (id two)
+   (text "2"))
+(text-for-id 
+   (id three)
+   (text "3"))
 
 ;; Questions
 (text-for-id
@@ -150,11 +158,8 @@
    (id stan-vs-holistic-qn.query)
    (text "Do you prefer just the standard hospitalization plan or do you prefer a more holistic hospitalization plan?"))  
 (text-for-id
-   (id private-vs-public-qn.query)
-   (text "In the event you are warded, do you prefer private or public hospitals?"))
-(text-for-id
-   (id B1-vs-A-qn.query)
-   (text "Do you prefer Class B1 wards or Class A wards?"))
+   (id hospital-ward-class-qn.query)
+   (text "Do you prefer (1) Restructured Hospitals, Class B1 Wards, (2) Restructured Hospitals, Class A Wards, or (3) Private Hospitals? (1/2/3)"))
 (text-for-id
    (id confinement-in-community-hospital-qn.query)
    (text "How much S$ per day do you want in the event of confinement in community hospital?"))
@@ -163,7 +168,7 @@
    (text "How much S$ per period do you want in the event of diagnose with congenital abnormalities?"))
 (text-for-id
    (id organ-transplant-qn.query)
-   (text "How much S$ do you want per living organ donor transplant?"))
+   (text "How much S$ do you prefer per living organ donor transplant?"))
 (text-for-id
    (id psychiatric-treatment-qn.query)
    (text "How much S$ do you want in the event of psychiatric treatment?"))
@@ -175,26 +180,70 @@
    (text "How much annual benefit limit do you want?"))  
 (text-for-id
    (id additional-cash-qn.query)
-   (text "Do you want additional cash to complement your hospitalization plan?"))
-
-
+   (text "Do you prefer higher or lower hospital cash incentive?"))
 (text-for-id
    (id additional-plan-qn.query)
    (text "Do you want to see additional benefits on top of your hospitalization plan?"))
+(text-for-id
+   (id daily-hospital-cash-benefit-qn.query)
+   (text "How much daily hospital cash benefit would you like in the event of hospitalization?"))
+(text-for-id
+   (id recuperation-benefit-qn.query)
+   (text "How much recuperation benefit would you like in the event of hospitalization?"))
+(text-for-id
+   (id complete-coverage-qn.query)
+   (text "Do you want a complete coverage (i.e. including deductible, co-insurance, comprehensive benefits etc.)?"))
+(text-for-id
+   (id worldwide-medical-coverage-qn.query)
+   (text "Do you want to extend medical coverage worldwide?"))
+(text-for-id
+   (id cancer-treatment-qn.query)
+   (text "Do you prefer higher or lower claims for cancer treatment?"))
+(text-for-id
+   (id emergency-assistance-services-qn.query)
+   (text "Do you want emergency assistance services?"))
+(text-for-id
+   (id emergency-assistance-services-qn.query)
+   (text "Do you prefer higher or lower additional annual benefit limit?"))
+
 
 
 
 ;; Recommendations
 (text-for-id
-   (id criticalcare)
-   (text "Recommended : Critical Care Advantage Plan"))
-(text-for-id
    (id supreme-health-standard)
-   (text "Recommended : Supreme Health Standard Plan"))
+   (text "Recommended plan: Supreme Health Standard Plan"))
+(text-for-id
+   (id supreme-health-B-plus)
+   (text "Recommended plan: Supreme Health B Plus"))
+(text-for-id
+   (id supreme-health-A-plus)
+   (text "Recommended plan: Supreme Health A Plus"))
+(text-for-id
+   (id supreme-health-P-plus)
+   (text "Recommended plan: Supreme Health P Plus"))
+(text-for-id
+   (id supreme-medicash-A)
+   (text "Recommended plan: Supreme MediCash Plan A"))
+(text-for-id
+   (id criticalcare)
+   (text "Recommended plan: Critical Care Advantage Plan"))
+(text-for-id
+   (id supreme-health-standard-medicash-A)
+   (text "Recommended plan: Supreme Health Standard Plan and MediCash Plan A"))
 (text-for-id
    (id supreme-health-standard-criticalcare)
-   (text "Recommended : Supreme Health Standard Plan and Critical Care Advantage Plan"))
-   
+   (text "Recommended plan: Supreme Health Standard Plan and Critical Care Advantage Plan"))
+(text-for-id
+   (id supreme-health-B-plus-criticalcare)
+   (text "Recommended plan: Supreme Health B Plus and Critical Care Advantage Plan"))
+(text-for-id
+   (id supreme-health-A-plus-criticalcare)
+   (text "Recommended plan: Supreme Health A Plus and Critical Care Advantage Plan"))
+(text-for-id
+   (id supreme-health-P-plus-criticalcare)
+   (text "Recommended plan: Supreme Health P Plus and Critical Care Advantage Plan"))
+
 
 (text-for-id
    (id none)
