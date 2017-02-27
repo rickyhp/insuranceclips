@@ -85,7 +85,7 @@
    (text "Standard"))
 (text-for-id 
    (id holistic)
-   (text "Holistic"))
+   (text "Comprehensive"))
 (text-for-id 
    (id private)
    (text "Private"))
@@ -179,17 +179,29 @@
    (id annual-benefit-limit-qn.query)
    (text "How much annual benefit limit do you want?"))  
 (text-for-id
-   (id additional-cash-qn.query)
+   (id hospital-cash-incentive-qn.query)
    (text "Do you prefer higher or lower hospital cash incentive?"))
 (text-for-id
    (id additional-plan-qn.query)
    (text "Do you want to see additional benefits on top of your hospitalization plan?"))
 (text-for-id
-   (id daily-hospital-cash-benefit-qn.query)
-   (text "How much daily hospital cash benefit would you like in the event of hospitalization?"))
+   (id daily-cash-benefit-qn.query)
+   (text "Do you want daily cash benefit for each day spend in hospital?"))
 (text-for-id
-   (id recuperation-benefit-qn.query)
-   (text "How much recuperation benefit would you like in the event of hospitalization?"))
+   (id daily-hospital-cash-benefit-illness-qn.query)
+   (text "How much daily hospital cash benefit (illness) do you prefer?"))
+(text-for-id
+   (id daily-hospital-cash-benefit-accident-qn.query)
+   (text "How much daily hospital cash benefit (accident) do you prefer?"))
+(text-for-id
+   (id daily-hospital-cash-benefit-ICU-qn.query)
+   (text "How much daily hospital cash benefit (ICU) do you prefer? ")) 
+(text-for-id
+   (id recuperation-benefit-non-surgical-hospitalisation-qn.query)
+   (text "How much recuperation benefit (non-surgical hospitalisation) do you prefer?"))
+(text-for-id
+   (id recuperation-benefit-post-surgery-qn.query)
+   (text "How much recuperation benefit (post surgery) do you prefer?"))   
 (text-for-id
    (id complete-coverage-qn.query)
    (text "Do you want a complete coverage (i.e. including deductible, co-insurance, comprehensive benefits etc.)?"))
@@ -197,14 +209,20 @@
    (id worldwide-medical-coverage-qn.query)
    (text "Do you want to extend medical coverage worldwide?"))
 (text-for-id
+   (id daily-hospital-income-benefit-qn.query)
+   (text "Do you prefer higher or lower daily hospital income benefit?"))
+(text-for-id
    (id cancer-treatment-qn.query)
    (text "Do you prefer higher or lower claims for cancer treatment?"))
 (text-for-id
    (id emergency-assistance-services-qn.query)
    (text "Do you want emergency assistance services?"))
 (text-for-id
-   (id emergency-assistance-services-qn.query)
+   (id additional-annual-benefit-limit-qn.query)
    (text "Do you prefer higher or lower additional annual benefit limit?"))
+(text-for-id
+   (id additional-lifetime-benefit-limit-qn.query)
+   (text "Do you prefer higher or lower additional lifetime benefit limit?"))
 
 
 
@@ -217,11 +235,17 @@
    (id supreme-health-B-plus)
    (text "Recommended plan: Supreme Health B Plus"))
 (text-for-id
+   (id supreme-health-B-plus-silver-essential)
+   (text "Recommended plan: Supreme Health B Plus, Total Health SILVER, Total Health Plus Essential"))
+(text-for-id
    (id supreme-health-A-plus)
    (text "Recommended plan: Supreme Health A Plus"))
 (text-for-id
    (id supreme-health-P-plus)
    (text "Recommended plan: Supreme Health P Plus"))
+(text-for-id
+   (id supreme-health-P-plus)
+   (text "Recommended plan: Supreme Health P Plus"))   
 (text-for-id
    (id supreme-medicash-A)
    (text "Recommended plan: Supreme MediCash Plan A"))
@@ -243,6 +267,7 @@
 (text-for-id
    (id supreme-health-P-plus-criticalcare)
    (text "Recommended plan: Supreme Health P Plus and Critical Care Advantage Plan"))
+
 
 
 (text-for-id
