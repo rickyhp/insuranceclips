@@ -154,7 +154,7 @@
 (defrule age-qn
 	(gender ?)
 	(not (age ?))
-=>	(printout t crlf "Please tell us your age range: (1) below 17 (2) between 18 and 39 (3) between 40 and 45 (4) above 46")
+=>	(printout t crlf "Please tell us your age range: (1) below 17 (2) between 18 and 39 (3) between 40 and 45 (4) above 45")
 	(bind ?response (read))
 	(assert (age ?response))
 )
