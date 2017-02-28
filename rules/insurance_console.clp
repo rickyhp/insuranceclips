@@ -159,18 +159,41 @@
 	(assert (age ?response))
 )
 
+;; Income
+(defrule determine-income
+    (age ?)
+    (not (income ?))
+   =>   
+    (printout t crlf "Please indicate your income range: (1) below 2000 (2) between 2000-7000 (3) above 7000")
+	(bind ?response (read))
+	(assert (income ?response))
+)
+
+;; Marital status
+(defrule determine-marital-status
+    (income ?)
+    (not (marital-status ?))
+   =>   
+    (printout t crlf "Are you married? (y)es/(n)o")
+	(bind ?response (read))
+	(assert (marital-status ?response))
+)
+
 ;;; Do you prefer a standard hospitalisation plan or a comprehensive hospitalisation plan?
 (defrule standard-vs-comprehensive-qn
 	(current_fact (fact Supreme-Health-Standard-Plan) (cf ?cf-Supreme-Health-Standard-Plan))
 	(current_fact (fact Supreme-Health-B-PLUS) (cf ?cf-Supreme-Health-B-PLUS))
 	(current_fact (fact Supreme-Health-A-PLUS) (cf ?cf-Supreme-Health-A-PLUS))
 	(current_fact (fact Supreme-Health-P-PLUS) (cf ?cf-Supreme-Health-P-PLUS))
+	(marital-status ?)
+	(not (standard-vs-comprehensive-ans ?))
 =>	(printout t crlf "Do you prefer a standard hospitalisation plan or a comprehensive hospitalisation plan? ((s)tandard/(c)omprehensive)")
 	(bind ?response (read))
 	(switch ?response
 		(case s then	(assert (Supreme-MediCash-start start))
+						(assert (standard-vs-comprehensive-ans Standard))
 						(assert (new_goal (goal Supreme-Health-Standard-Plan) (cf (* ?cf-Supreme-Health-Standard-Plan 0.6)))))
-		(case c then	(assert (standard-vs-comprehensive-ans ?response))
+		(case c then	(assert (standard-vs-comprehensive-ans Comprehensive))
 						(assert (new_goal (goal Supreme-Health-B-PLUS) (cf (* ?cf-Supreme-Health-B-PLUS 0.6))))
 						(assert (new_goal (goal Supreme-Health-A-PLUS) (cf (* ?cf-Supreme-Health-A-PLUS 0.6))))
 						(assert (new_goal (goal Supreme-Health-P-PLUS) (cf (* ?cf-Supreme-Health-P-PLUS 0.6))))
@@ -607,17 +630,34 @@
 	)
 )
 
-;;; Critical care Plan
+;;;***********************************************************
+;;;	Critical care Plan
+;;;***********************************************************
 (defrule drinking-habits ""
    (additional-plan-ans y)
    (not (drinkhabits ?))
    (current_fact (fact Critical-Care-Advantage) (cf ?cf-Critical-Care-Advantage))
    =>
-    (printout t crlf "Are you drinking regularly? ((y)es/(n)o)")
+    (printout t crlf "Are you drinking regularly? (y)es/(n)o")
 	(bind ?response (read))
 	(assert(drinkhabits ?response))
 	(if(eq ?response y)
 		then (assert (new_goal (goal Critical-Care-Advantage) (cf (* ?cf-Critical-Care-Advantage 0.7))))
+	)
+)
+
+(defrule travel-frequency ""
+   (drinkhabits y)   
+   (current_fact (fact Critical-Care-Advantage) (cf ?cf-Critical-Care-Advantage))
+   =>
+    (printout t crlf "How often do you travel in a month? (e)veryday (o)nceortwice (s)eldom (n)o")
+	(bind ?response (read))
+	(assert(travel-frequency ?response))
+	(switch ?response
+		(case e then (assert (new_goal (goal Critical-Care-Advantage) (cf (* ?cf-Critical-Care-Advantage 0.8)))))
+		(case o then (assert (new_goal (goal Critical-Care-Advantage) (cf (* ?cf-Critical-Care-Advantage 0.65)))))
+		(case s then (assert (new_goal (goal Critical-Care-Advantage) (cf (* ?cf-Critical-Care-Advantage 0.60)))))
+		(case n then (assert (new_goal (goal Critical-Care-Advantage) (cf (* ?cf-Critical-Care-Advantage 0.5)))))
 	)
 )
 
