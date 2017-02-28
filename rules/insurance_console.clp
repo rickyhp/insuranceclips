@@ -29,6 +29,7 @@
 	(slot Supreme-MediCash-Plan-A)
 	(slot Supreme-MediCash-Plan-B)
 	(slot Supreme-MediCash-Plan-C)
+	(slot Critical-Care-Advantage)
 )
 
 (deffacts load-facts
@@ -51,6 +52,7 @@
 	(current_fact (fact Supreme-MediCash-Plan-A) (cf 0.5))
 	(current_fact (fact Supreme-MediCash-Plan-B) (cf 0.5))
 	(current_fact (fact Supreme-MediCash-Plan-C) (cf 0.5))
+	(current_fact (fact Critical-Care-Advantage) (cf 0.5))
 
 	(current_goal (goal Supreme-Health-Standard-Plan) (cf 0.5))
 	(current_goal (goal Supreme-Health-B-PLUS) (cf 0.5))
@@ -70,7 +72,8 @@
 	(current_goal (goal P-PLUS-PLATINUM-ADVANCE) (cf 0.5))
 	(current_goal (goal Supreme-MediCash-Plan-A) (cf 0.5))
 	(current_goal (goal Supreme-MediCash-Plan-B) (cf 0.5))
-	(current_goal (goal Supreme-MediCash-Plan-C) (cf 0.5))
+	(current_goal (goal Supreme-MediCash-Plan-C) (cf 0.5))	
+	(current_goal (goal Critical-Care-Advantage) (cf 0.5))
 )
 
 (defrule initialise-current-goal
@@ -133,7 +136,7 @@
 (defrule greeting-qn
 	(declare (salience 1000))
 	(not (greeting ?))	
-=>	(printout t crlf "Welcome to GE Life Insurance System, press any key to continue")	
+=>	(printout t crlf "Welcome to GE Life Insurance System, press any key and ENTER to continue")	
 	(bind ?response (read))	
 	(assert (greeting yes))
 )
@@ -142,9 +145,18 @@
 (defrule gender-qn
 	(greeting yes)
 	(not (gender ?))
-=>	(printout t crlf "What is your gender? ((M)ale/(F)emale)")
+=>	(printout t crlf "What is your gender? ((m)ale/(f)emale)")
 	(bind ?response (read))
 	(assert (gender ?response))
+)
+
+;;; Age
+(defrule age-qn
+	(gender ?)
+	(not (age ?))
+=>	(printout t crlf "Please tell us your age range: (1) below 17 (2) between 17 and 55 (3) above 55")
+	(bind ?response (read))
+	(assert (age ?response))
 )
 
 ;;; Do you prefer a standard hospitalisation plan or a comprehensive hospitalisation plan?
@@ -153,12 +165,12 @@
 	(current_fact (fact Supreme-Health-B-PLUS) (cf ?cf-Supreme-Health-B-PLUS))
 	(current_fact (fact Supreme-Health-A-PLUS) (cf ?cf-Supreme-Health-A-PLUS))
 	(current_fact (fact Supreme-Health-P-PLUS) (cf ?cf-Supreme-Health-P-PLUS))
-=>	(printout t crlf "Do you prefer a standard hospitalisation plan or a comprehensive hospitalisation plan? (Standard/Comprehensive)")
+=>	(printout t crlf "Do you prefer a standard hospitalisation plan or a comprehensive hospitalisation plan? ((s)tandard/(c)omprehensive)")
 	(bind ?response (read))
 	(switch ?response
-		(case Standard then		(assert (Supreme-MediCash-start start))
+		(case s then	(assert (Supreme-MediCash-start start))
 						(assert (new_goal (goal Supreme-Health-Standard-Plan) (cf (* ?cf-Supreme-Health-Standard-Plan 0.6)))))
-		(case Comprehensive then	(assert (standard-vs-comprehensive-ans ?response))
+		(case c then	(assert (standard-vs-comprehensive-ans ?response))
 						(assert (new_goal (goal Supreme-Health-B-PLUS) (cf (* ?cf-Supreme-Health-B-PLUS 0.6))))
 						(assert (new_goal (goal Supreme-Health-A-PLUS) (cf (* ?cf-Supreme-Health-A-PLUS 0.6))))
 						(assert (new_goal (goal Supreme-Health-P-PLUS) (cf (* ?cf-Supreme-Health-P-PLUS 0.6))))
@@ -491,14 +503,14 @@
 	(current_fact (fact Supreme-MediCash-Plan-A) (cf ?cf-Supreme-MediCash-Plan-A))
 	(current_fact (fact Supreme-MediCash-Plan-B) (cf ?cf-Supreme-MediCash-Plan-B))
 	(current_fact (fact Supreme-MediCash-Plan-C) (cf ?cf-Supreme-MediCash-Plan-C))
-=>	(printout t crlf "Do you want daily cash benefit for each day spend in hospital? (Yes/No)")
+=>	(printout t crlf "Do you want daily cash benefit for each day spend in hospital? ((y)es/(n)o)")
 	(bind ?response (read))
 	(switch ?response
-		(case Yes then		(assert (daily-cash-benefit-ans ?response))
+		(case y then (assert (daily-cash-benefit-ans ?response))
 					(assert (new_goal (goal Supreme-MediCash-Plan-A) (cf (* ?cf-Supreme-MediCash-Plan-A 0.6))))
 					(assert (new_goal (goal Supreme-MediCash-Plan-B) (cf (* ?cf-Supreme-MediCash-Plan-B 0.6))))
 					(assert (new_goal (goal Supreme-MediCash-Plan-C) (cf (* ?cf-Supreme-MediCash-Plan-C 0.6)))))
-		(case No then		(assert (Critical-Care-Advantage start)))									;;; NOTE!!!
+		(case n then (assert (Critical-Care-Advantage start)))
 	)
 )
 
@@ -578,6 +590,37 @@
 	)
 )
 
+;;; Do you want to see additional benefits on top of your hospitalization plan?
+;;; go to critical care specific rules
+(defrule additional-plan-qn
+   (Critical-Care-Advantage start)
+   (not (additional-plan-ans ?))
+   (current_fact (fact Critical-Care-Advantage) (cf ?cf-Critical-Care-Advantage))
+=>	
+	(printout t crlf "Do you want to see additional benefits on top of your hospitalization plan? ((y)es/(n)o)")
+	(bind ?response (read))
+	(assert(additional-plan-ans ?response))
+	(if (eq ?response y)
+		then (			
+			assert(new_goal (goal Critical-Care-Advantage) (cf (* ?cf-Critical-Care-Advantage 0.5)))
+		)
+	)
+)
+
+;;; Critical care Plan
+(defrule drinking-habits ""
+   (additional-plan-ans y)
+   (not (drinkhabits ?))
+   (current_fact (fact Critical-Care-Advantage) (cf ?cf-Critical-Care-Advantage))
+   =>
+    (printout t crlf "Are you drinking regularly? ((y)es/(n)o)")
+	(bind ?response (read))
+	(assert(drinkhabits ?response))
+	(if(eq ?response y)
+		then (assert (new_goal (goal Critical-Care-Advantage) (cf (* ?cf-Critical-Care-Advantage 0.7))))
+	)
+)
+
 ;;; Recommendation
 (defrule compile_recomendations
 	(current_goal (goal Supreme-Health-Standard-Plan) (cf ?cf-Supreme-Health-Standard-Plan))
@@ -599,7 +642,7 @@
 	(current_goal (goal Supreme-MediCash-Plan-A) (cf ?cf-Supreme-MediCash-Plan-A))
 	(current_goal (goal Supreme-MediCash-Plan-B) (cf ?cf-Supreme-MediCash-Plan-B))
 	(current_goal (goal Supreme-MediCash-Plan-C) (cf ?cf-Supreme-MediCash-Plan-C))
-
+	(current_goal (goal Critical-Care-Advantage) (cf ?cf-Critical-Care-Advantage))
 =>	(assert (recomendation
 		(Supreme-Health-Standard-Plan ?cf-Supreme-Health-Standard-Plan)
 		(Supreme-Health-B-PLUS ?cf-Supreme-Health-B-PLUS)
@@ -620,6 +663,7 @@
 		(Supreme-MediCash-Plan-A ?cf-Supreme-MediCash-Plan-A)
 		(Supreme-MediCash-Plan-B ?cf-Supreme-MediCash-Plan-B)
 		(Supreme-MediCash-Plan-C ?cf-Supreme-MediCash-Plan-C)
+		(Critical-Care-Advantage ?cf-Critical-Care-Advantage)
 	))
 
 	(printout t crlf "Recomendation:")
@@ -642,4 +686,5 @@
 	(printout t crlf "Supreme-MediCash-Plan-A: " ?cf-Supreme-MediCash-Plan-A)
 	(printout t crlf "Supreme-MediCash-Plan-B: " ?cf-Supreme-MediCash-Plan-B)
 	(printout t crlf "Supreme-MediCash-Plan-C: " ?cf-Supreme-MediCash-Plan-C crlf)
+	(printout t crlf "Critical-Care-Advantage: " ?cf-Critical-Care-Advantage crlf)
 )
