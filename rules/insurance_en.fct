@@ -232,20 +232,20 @@
    (id supreme-health-standard)
    (text "Recommended plan: Supreme Health Standard Plan"))
 (text-for-id
-   (id supreme-health-B-plus)
-   (text "Recommended plan: Supreme Health B Plus"))
+   (id supreme-health-B-plus-silver)
+   (text "Recommended plan: Supreme Health B Plus and Total Health Silver"))
 (text-for-id
    (id supreme-health-B-plus-silver-essential)
-   (text "Recommended plan: Supreme Health B Plus, Total Health SILVER, Total Health Plus Essential"))
+   (text "Recommended plan: Supreme Health B Plus, Total Health Silver, Total Health Plus Essential"))
 (text-for-id
    (id supreme-health-A-plus)
    (text "Recommended plan: Supreme Health A Plus"))
 (text-for-id
-   (id supreme-health-P-plus)
-   (text "Recommended plan: Supreme Health P Plus"))
+   (id supreme-health-B-plus)
+   (text "Recommended plan: Supreme Health B Plus"))
 (text-for-id
    (id supreme-health-P-plus)
-   (text "Recommended plan: Supreme Health P Plus"))   
+   (text "Recommended plan: Supreme Health P Plus"))
 (text-for-id
    (id supreme-medicash-A)
    (text "Recommended plan: Supreme MediCash Plan A"))

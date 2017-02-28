@@ -15,51 +15,7 @@
 ;; to store the current facts with certainty factors
 (deftemplate current_fact (slot fact) (slot cf))
 
-(deffacts load-facts
-	(current_fact (fact Supreme-Health-Standard-Plan) (cf 0.5))
-	(current_fact (fact Supreme-Health-B-PLUS) (cf 0.5))
-	(current_fact (fact Supreme-Health-A-PLUS) (cf 0.5))
-	(current_fact (fact Supreme-Health-P-PLUS) (cf 0.5))
-	(current_fact (fact B-PLUS-SILVER) (cf 0.5))
-	(current_fact (fact A-PLUS-GOLD) (cf 0.5))
-	(current_fact (fact P-PLUS-PLATINUM-LITE) (cf 0.5))
-	(current_fact (fact P-PLUS-PLATINUM) (cf 0.5))
-	(current_fact (fact B-PLUS-SILVER-ESSENTIAL) (cf 0.5))
-	(current_fact (fact B-PLUS-SILVER-ADVANCE) (cf 0.5))
-	(current_fact (fact A-PLUS-GOLD-ESSENTIAL) (cf 0.5))
-	(current_fact (fact A-PLUS-GOLD-ADVANCE) (cf 0.5))
-	(current_fact (fact P-PLUS-PLATINUM-LITE-ESSENTIAL) (cf 0.5))
-	(current_fact (fact P-PLUS-PLATINUM-LITE-ADVANCE) (cf 0.5))
-	(current_fact (fact P-PLUS-PLATINUM-ESSENTIAL) (cf 0.5))
-	(current_fact (fact P-PLUS-PLATINUM-ADVANCE) (cf 0.5))
-	(current_fact (fact Supreme-MediCash-Plan-A) (cf 0.5))
-	(current_fact (fact Supreme-MediCash-Plan-B) (cf 0.5))
-	(current_fact (fact Supreme-MediCash-Plan-C) (cf 0.5))
-
-	(current_goal (goal Supreme-Health-Standard-Plan) (cf 0.5))
-	(current_goal (goal Supreme-Health-B-PLUS) (cf 0.5))
-	(current_goal (goal Supreme-Health-A-PLUS) (cf 0.5))
-	(current_goal (goal Supreme-Health-P-PLUS) (cf 0.5))
-	(current_goal (goal B-PLUS-SILVER) (cf 0.5))
-	(current_goal (goal A-PLUS-GOLD) (cf 0.5))
-	(current_goal (goal P-PLUS-PLATINUM-LITE) (cf 0.5))
-	(current_goal (goal P-PLUS-PLATINUM) (cf 0.5))
-	(current_goal (goal B-PLUS-SILVER-ESSENTIAL) (cf 0.5))
-	(current_goal (goal B-PLUS-SILVER-ADVANCE) (cf 0.5))
-	(current_goal (goal A-PLUS-GOLD-ESSENTIAL) (cf 0.5))
-	(current_goal (goal A-PLUS-GOLD-ADVANCE) (cf 0.5))
-	(current_goal (goal P-PLUS-PLATINUM-LITE-ESSENTIAL) (cf 0.5))
-	(current_goal (goal P-PLUS-PLATINUM-LITE-ADVANCE) (cf 0.5))
-	(current_goal (goal P-PLUS-PLATINUM-ESSENTIAL) (cf 0.5))
-	(current_goal (goal P-PLUS-PLATINUM-ADVANCE) (cf 0.5))
-	(current_goal (goal Supreme-MediCash-Plan-A) (cf 0.5))
-	(current_goal (goal Supreme-MediCash-Plan-B) (cf 0.5))
-	(current_goal (goal Supreme-MediCash-Plan-C) (cf 0.5))
-    
-    (current_goal (goal Critical-Care-Plan) (cf 0.5))
-	(current_goal (goal supreme-health-standard-criticalcare) (cf 0.5))
-	
-)
+;;;(load-facts c:\inetpub\wwwroot\insurance\initfacts.txt)
 
 (deftemplate MAIN::text-for-id
    (slot id)
@@ -198,64 +154,10 @@
                 greeting
                 (create$)))
 
-;;;********************
-;;;* CERTAINTY FACTORS*
-;;;********************
-
-;;;***********************************************************************
-;;; combine POSITIVE (or ZERO) certainty factors for multiple conclusions*
-;;; cf(cf1,cf2) = cf1 + cf2 * (1- cf1)                                   *
-;;;***********************************************************************
-
-(defrule combine-positive-cf
-	?f1 <- (current_goal (goal ?g)(cf ?cf1&:(>= ?cf1 0)))
-	?f2 <- (new_goal (goal ?g)(cf ?cf2&:(>= ?cf2 0)))
-  =>
-  	(retract ?f2) ; removes new_goal
-	(modify ?f1 (cf =(+ ?cf1 (* ?cf2 (- 1 ?cf1)))))
-	(printout t "B-1= " ?cf1 crlf) ;;; for debugging
-	(printout t "B-2= " ?cf2 crlf) ;;; for debugging
-	(printout t "B1-B2 combined = " (+ ?cf1 (* ?cf2 (- 1 ?cf1))) crlf)
-)
-
-;;;***********************************************************************
-;;;combine NEGATIVE certainty factors for multiple conclusions           *
-;;;cf(cf1,cf2) = cf1 + cf2 * (1+cf1)                                     *
-;;;***********************************************************************
-(defrule combine-negative-cf
- 	(declare (salience -1))
-	?f1 <- (current_goal (goal ?g)(cf ?cf1&:(< ?cf1 0)))
-  	?f2 <- (new_goal (goal ?g)(cf ?cf2&:(< ?cf2 0)))
-  =>
-  	(retract ?f2) ; removes new_goal
-	(modify ?f1 (cf =(+ ?cf1 (* ?cf2 (+ 1 ?cf1)))))
-)
-
-;;;***********************************************************************
-;combine POSITIVE & NEGATIVE certainty factors for multiple conclusions  *
-;cf(cf1,cf2) = (cf1 + cf2)/ 1- MIN(|cf1|, |cf1|)                         *
-;;;***********************************************************************
-(defrule combine-pos-neg-cf
- 	(declare (salience -1))
-  	?f1 <- (current_goal (goal ?g) (cf ?cf1))
-  	?f2 <- (new_goal (goal ?g) (cf ?cf2))
-  	(test (< (* ?cf1 ?cf2) 0))
-  =>
-  	(retract ?f2) ; removes new_goal
-	(modify ?f1 (cf =(/ (+ ?cf1 ?cf2) (- 1 (min (abs ?cf1) (abs ?cf2))))))
-)
 
 ;;;***************
 ;;;* QUERY RULES *
 ;;;***************
-
-;; initialise current goal when a new_goal is asserted
-(defrule initialise-current-goal
-	?newg <- (new_goal (goal ?ng) (cf ?cfng))
-    (not (current_goal (goal ?cg) (cf ?cfg)))
-=> 	(assert (current_goal (goal ?ng) (cf ?cfng)))
-	(retract ?newg)
-)
 
 (defrule determine-gender ""
 
@@ -416,7 +318,8 @@
                  standard-vs-holistic-ans
                  (nth$ 1 ?answers)
                  ?answers
-                 (translate-av ?answers)))
+                 (translate-av ?answers))
+)
 
 ;;; Do you prefer (1) Restructured Hospitals, Class B1 Wards, (2) Restructured Hospitals, Class A Wards, or (3) Private Hospitals? (1/2/3)
 (defrule hospital-ward-class-qn
@@ -765,12 +668,9 @@
                  (translate-av ?answers))
 )
 
-
-
-
-;;;**********************
-;;;* FACTS AND GOALS CF *
-;;;**********************
+;;;*****************************
+;;;* Common FACTS AND GOALS CF *
+;;;*****************************
 
 (defrule smoker ""
     (declare (salience 99))
@@ -863,82 +763,60 @@
     (assert(current_fact (fact travelhabits) (cf 0.6)))
 )
 
+;;;**************************************************************
+;;;	Rules for Supreme Health Policy CF Calculations
+;;;**************************************************************
 
+;;;********************
+;;;* CERTAINTY FACTORS*
+;;;********************
 
-;;; Supreme MediCash Plan A
-(defrule supreme-medicash-plan-A
-	(or (daily-hospital-cash-benefit-ans low) (recuperation-benefit-ans low))
-=>	
-    (assert (total-health start))
-    (assert (current_fact (fact supreme-medicash-A) (cf 1.0)))
+;; initialise current goal when a new_goal is asserted
+(defrule initialise-current-goal	
+	(not (current_goal (goal ?cg) (cf ?cfg)))
+	?newg <- (new_goal (goal ?ng) (cf ?cfng))
+=> 	(assert (current_goal (goal ?ng) (cf ?cfng)))
+	(retract ?newg)
 )
 
-;;; Supreme Health Standard and Medicash Plan A
-(defrule supremehealth-medicashplanA-conclusions
-    (standard-vs-holistic-ans standard)
-    (additional-plan-ans yes)
-    (current_fact (fact supreme-medicash-A) (cf ?cf-sma))
-    
-   =>	
-    
-    (assert (new_goal (goal supreme-health-standard-medicash-A) (cf ?cf-sma)))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;combine POSITIVE (or ZERO) certainty factors for multiple conclusions
+;cf(cf1,cf2) = cf1 + cf2 * (1- cf1)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defrule combine-positive-cf
+	?f1 <- (current_goal (goal ?g)(cf ?cf1&:(>= ?cf1 0)))
+	?f2 <- (new_goal (goal ?g)(cf ?cf2&:(>= ?cf2 0)))
+  =>
+  	(retract ?f2) ; removes new_goal
+	(modify ?f1 (cf =(+ ?cf1 (* ?cf2 (- 1 ?cf1)))))
+	(printout t "B-1= " ?cf1 crlf) ;;; for debugging
+	(printout t "B-2= " ?cf2 crlf) ;;; for debugging
+	(printout t "B1-B2 combined = " (+ ?cf1 (* ?cf2 (- 1 ?cf1))) crlf)
 )
 
-;;; Supreme Health Standard and Critical Care
-(defrule supremehealth-criticalcare-conclusions
-	(current_fact (fact gender) (cf ?cf-g))
-    (current_fact (fact age) (cf ?cf-a))
-    (or(income bet2kand7k)(income above7k))    
-    (current_fact (fact drinkhabits) (cf ?cf-d))
-    (current_fact (fact travelhabits) (cf ?cf-t))
-    (current_fact (fact smoking) (cf ?cf-s))
-    (standard-vs-holistic-ans standard)
-    (additional-plan-ans yes)
-    
-   =>	
-    
-    (assert (new_goal (goal supreme-health-standard-criticalcare) (cf (* (min ?cf-s ?cf-g ?cf-a ?cf-d ?cf-t) 0.95))))
-	(handle-state conclusion (find-text-for-id supreme-health-standard-criticalcare) (* (min ?cf-s ?cf-g ?cf-a ?cf-d ?cf-t) 0.95))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;combine NEGATIVE certainty factors for multiple conclusions
+;cf(cf1,cf2) = cf1 + cf2 * (1+cf1)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defrule combine-negative-cf
+	?f1 <- (current_goal (goal ?g)(cf ?cf1&:(< ?cf1 0)))
+  	?f2 <- (new_goal (goal ?g)(cf ?cf2&:(< ?cf2 0)))
+  =>
+  	(retract ?f2) ; removes new_goal
+	(modify ?f1 (cf =(+ ?cf1 (* ?cf2 (+ 1 ?cf1)))))
 )
 
-;;; Supreme Health B Plus
-(defrule supremehealth-bplus-conclusions
-    (additional-plan-ans no)
-    (current_fact (fact supreme-health-B-plus) (cf ?cf-shbp))
-    
-   =>	
-    
-    (assert (new_goal (goal supreme-health-B-plus) (cf ?cf-shbp)))
-)
-
-;;; Supreme Health A Plus
-(defrule supremehealth-aplus-conclusions
-    (additional-plan-ans no)
-    (current_fact (fact supreme-health-A-plus) (cf ?cf-shap))
-    
-   =>	
-    
-    (assert (new_goal (goal supreme-health-A-plus) (cf ?cf-shap)))
-)
-
-;;; Supreme Health B Plus and Critical Care
-(defrule supremehealth-criticalcare-conclusions
-	(current_fact (fact gender) (cf ?cf-g))
-    (current_fact (fact age) (cf ?cf-a))
-    (or(income bet2kand7k)(income above7k))
-    (marital ?)
-    (citizenship ?)
-    (race ?)
-    (current_fact (fact drinkhabits) (cf ?cf-d))
-    (current_fact (fact travelhabits) (cf ?cf-t))
-    (current_fact (fact smoking) (cf ?cf-s))
-    (standard-vs-holistic-ans holistic)
-    (additional-plan-ans yes)
-    (current_fact (fact supreme-health-B-plus)(cf ?cf-shbp))
-    
-   =>	
-    
-    (assert (new_goal (goal supreme-health-B-plus-criticalcare) (cf (* (min ?cf-s ?cf-g ?cf-a ?cf-d ?cf-t ?cf-shbp) 0.95))))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;combine POSITIVE & NEGATIVE certainty factors for multiple conclusions
+;cf(cf1,cf2) = (cf1 + cf2)/ 1- MIN(|cf1|, |cf1|)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defrule combine-pos-neg-cf
+  	?f1 <- (current_goal (goal ?g) (cf ?cf1))
+  	?f2 <- (new_goal (goal ?g) (cf ?cf2))
+  	(test (< (* ?cf1 ?cf2) 0))
+  =>
+  	(retract ?f2) ; removes new_goal
+	(modify ?f1 (cf =(/ (+ ?cf1 ?cf2) (- 1 (min (abs ?cf1) (abs ?cf2))))))
 )
 
 ;;; standard vs comprehensive CF
@@ -948,40 +826,48 @@
 	(current_fact (fact Supreme-Health-A-PLUS) (cf ?cf-Supreme-Health-A-PLUS))
 	(current_fact (fact Supreme-Health-P-PLUS) (cf ?cf-Supreme-Health-P-PLUS))
     (standard-vs-holistic-ans ?response)
+	(daily-cash-benefit-ans no)
+    (additional-plan-ans no) 	
 =>	
 	(switch ?response
 		(case standard then
-						(assert (new_goal (goal Supreme-Health-Standard-Plan) (cf (* ?cf-Supreme-Health-Standard-Plan 0.6)))))
-		(case holistic then
-						(assert (new_goal (goal Supreme-Health-B-PLUS) (cf (* ?cf-Supreme-Health-B-PLUS 0.6))))
-						(assert (new_goal (goal Supreme-Health-A-PLUS) (cf (* ?cf-Supreme-Health-A-PLUS 0.6))))
-						(assert (new_goal (goal Supreme-Health-P-PLUS) (cf (* ?cf-Supreme-Health-P-PLUS 0.6))))
+			(assert (new_goal (goal Supreme-Health-Standard-Plan) (cf (* ?cf-Supreme-Health-Standard-Plan 0.6))))
 		)
-	)
+		(case holistic then
+			(assert (new_goal (goal Supreme-Health-B-PLUS) (cf (* ?cf-Supreme-Health-B-PLUS 0.6))))
+			(assert (new_goal (goal Supreme-Health-A-PLUS) (cf (* ?cf-Supreme-Health-A-PLUS 0.6))))
+			(assert (new_goal (goal Supreme-Health-P-PLUS) (cf (* ?cf-Supreme-Health-P-PLUS 0.6))))
+		)
+	)	
 )
 
 ;;; Hospital/Ward Class Entitlement CF
-(defrule hospital-ward-class-cf
-	(standard-vs-holistic-ans holistic)
+(defrule hospital-ward-class-cf	
 	(current_fact (fact Supreme-Health-B-PLUS) (cf ?cf-Supreme-Health-B-PLUS))
 	(current_fact (fact Supreme-Health-A-PLUS) (cf ?cf-Supreme-Health-A-PLUS))
-	(current_fact (fact Supreme-Health-P-PLUS) (cf ?cf-Supreme-Health-P-PLUS))
+	(current_fact (fact Supreme-Health-P-PLUS) (cf ?cf-Supreme-Health-P-PLUS))	
+	(standard-vs-holistic-ans holistic)
     (hospital-ward-class-ans ?response)
-=>	
-
-(switch ?response
-		(case one then	(assert (new_goal (goal Supreme-Health-B-PLUS) (cf (* ?cf-Supreme-Health-B-PLUS 0.9)))))
-		(case two then	(assert (new_goal (goal Supreme-Health-A-PLUS) (cf (* ?cf-Supreme-Health-A-PLUS 0.9)))))
-		(case three then	(assert (new_goal (goal Supreme-Health-P-PLUS) (cf (* ?cf-Supreme-Health-P-PLUS 0.9)))))
+=>				
+	(switch ?response
+		(case one then
+			(assert (new_goal (goal Supreme-Health-B-PLUS) (cf (* ?cf-Supreme-Health-B-PLUS 0.9))))						
+		)
+		(case two then
+			(assert (new_goal (goal Supreme-Health-A-PLUS) (cf (* ?cf-Supreme-Health-A-PLUS 0.9))))
+		)
+		(case three then
+			(assert (new_goal (goal Supreme-Health-P-PLUS) (cf (* ?cf-Supreme-Health-P-PLUS 0.9))))
+		)		
 	)
 )
 
 ;;; Confinement in Community Hospital
-(defrule confinement-in-community-hospital-cf
-	(standard-vs-holistic-ans holistic)
+(defrule confinement-in-community-hospital-cf	
 	(current_fact (fact Supreme-Health-B-PLUS) (cf ?cf-Supreme-Health-B-PLUS))
 	(current_fact (fact Supreme-Health-A-PLUS) (cf ?cf-Supreme-Health-A-PLUS))
-	(current_fact (fact Supreme-Health-P-PLUS) (cf ?cf-Supreme-Health-P-PLUS))
+	(current_fact (fact Supreme-Health-P-PLUS) (cf ?cf-Supreme-Health-P-PLUS))	
+	(confinement-in-community-hospital-ans ?response)
 =>	
     (switch ?response
 		(case low then		(assert (new_goal (goal Supreme-Health-B-PLUS) (cf (* ?cf-Supreme-Health-B-PLUS 0.4)))))
@@ -991,11 +877,11 @@
 )
 
 ;;; Congenital Abnormalities
-(defrule congenital-abnormalities-cf
-	(standard-vs-holistic-ans holistic)
+(defrule congenital-abnormalities-cf	
 	(current_fact (fact Supreme-Health-B-PLUS) (cf ?cf-Supreme-Health-B-PLUS))
 	(current_fact (fact Supreme-Health-A-PLUS) (cf ?cf-Supreme-Health-A-PLUS))
 	(current_fact (fact Supreme-Health-P-PLUS) (cf ?cf-Supreme-Health-P-PLUS))
+	(congenital-abnormalities-ans ?response)
 =>	
 	(switch ?response
 		(case low then		(assert (new_goal (goal Supreme-Health-B-PLUS) (cf (* ?cf-Supreme-Health-B-PLUS 0.4)))))
@@ -1005,11 +891,11 @@
 )
 
 ;;; Living Organ Donor Transplant
-(defrule living-organ-donor-transplant-cf
-	(standard-vs-holistic-ans holistic)
+(defrule living-organ-donor-transplant-cf	
 	(current_fact (fact Supreme-Health-B-PLUS) (cf ?cf-Supreme-Health-B-PLUS))
 	(current_fact (fact Supreme-Health-A-PLUS) (cf ?cf-Supreme-Health-A-PLUS))
 	(current_fact (fact Supreme-Health-P-PLUS) (cf ?cf-Supreme-Health-P-PLUS))
+	(living-organ-donor-transplant-ans ?response)
 =>	
 	(switch ?response
 		(case low then		(assert (new_goal (goal Supreme-Health-B-PLUS) (cf (* ?cf-Supreme-Health-B-PLUS 0.4)))))
@@ -1019,11 +905,11 @@
 )
 
 ;;; Final Expenses Benefit
-(defrule final-expenses-benefit-cf
-	(standard-vs-holistic-ans holistic)
+(defrule final-expenses-benefit-cf	
 	(current_fact (fact Supreme-Health-B-PLUS) (cf ?cf-Supreme-Health-B-PLUS))
 	(current_fact (fact Supreme-Health-A-PLUS) (cf ?cf-Supreme-Health-A-PLUS))
 	(current_fact (fact Supreme-Health-P-PLUS) (cf ?cf-Supreme-Health-P-PLUS))
+	(final-expenses-benefit-ans ?response)
 =>	
     (switch ?response
 		(case low then		(assert (new_goal (goal Supreme-Health-B-PLUS) (cf (* ?cf-Supreme-Health-B-PLUS 0.4)))))
@@ -1033,11 +919,11 @@
 )
 
 ;;; Annual Benefit Limit
-(defrule annual-benefit-limit-cf
-	(standard-vs-holistic-ans holistic)
+(defrule annual-benefit-limit-cf	
 	(current_fact (fact Supreme-Health-B-PLUS) (cf ?cf-Supreme-Health-B-PLUS))
 	(current_fact (fact Supreme-Health-A-PLUS) (cf ?cf-Supreme-Health-A-PLUS))
 	(current_fact (fact Supreme-Health-P-PLUS) (cf ?cf-Supreme-Health-P-PLUS))
+	(annual-benefit-limit-ans ?response)
 =>	
     (assert (Total-Health-start start))
 	(assert (determine-supreme-health-start start))
@@ -1048,340 +934,39 @@
 	)
 )
 
-;; Determine Supreme Health Policy e.g. A, B or P Plus
-(defrule determine-supreme-health	
-	(determine-supreme-health-start start)
-	(current_goal (goal Supreme-Health-A-PLUS) (cf ?cf-sma))
-	(current_goal (goal Supreme-Health-B-PLUS) (cf ?cf-smb))
-	(current_goal (goal Supreme-Health-P-PLUS) (cf ?cf-smp))
-=>	
-	(if(>= ?cf-sma ?cf-smb)then
-		(if(>= ?cf-smb ?cf-smp)then
-			(assert (recommend-A-PLUS true))
-		else
-			(if(>= ?cf-sma ?cf-smp)then
-				(assert (recommend-A-PLUS true))
-			 else
-				(assert (recommend-P-PLUS true))
-			)
-		)
-	else
-		(if(>= ?cf-smb ?cf-smp)then
-			(assert (recommend-B-PLUS true))
-		else
-			(assert (recommend-P-PLUS true))			
-		)
-	)			
+
+;;;*****************************************************
+;;;	Supreme Health Policy Conclusions
+;;;*****************************************************
+
+;;; Supreme Health Standard-Plan
+(defrule supremehealth-standard-conclusions
+	(standard-vs-holistic-ans standard)
+	(daily-cash-benefit-ans no)
+    (additional-plan-ans no)      
+	(current_goal (goal Supreme-Health-Standard-Plan) (cf ?cf-shsp))
+   =>    
+    (handle-state conclusion (find-text-for-id supreme-health-standard) ?cf-shsp)
 )
 
-;;; Do you want a complete coverage?
-(defrule complete-coverage-cf
-    (Total-Health-start start)
-	(current_fact (fact Supreme-Health-B-PLUS) (cf ?cf-Supreme-Health-B-PLUS))
-	(current_fact (fact Supreme-Health-A-PLUS) (cf ?cf-Supreme-Health-A-PLUS))
-	(current_fact (fact Supreme-Health-P-PLUS) (cf ?cf-Supreme-Health-P-PLUS))
-	(current_fact (fact B-PLUS-SILVER) (cf ?cf-B-PLUS-SILVER))
-	(current_fact (fact A-PLUS-GOLD) (cf ?cf-A-PLUS-GOLD))
-	(current_fact (fact P-PLUS-PLATINUM-LITE) (cf ?cf-P-PLUS-PLATINUM-LITE))
-	(current_fact (fact P-PLUS-PLATINUM) (cf ?cf-P-PLUS-PLATINUM))
-	(complete-coverage-ans ?response)
-=>	
-    (switch ?response
-		(case yes then 
-					(assert (complete-coverage-ans ?response))
-					(assert (new_goal (goal Supreme-Health-B-PLUS) (cf (* ?cf-Supreme-Health-B-PLUS -0.6))))
-					(assert (new_goal (goal Supreme-Health-A-PLUS) (cf (* ?cf-Supreme-Health-A-PLUS -0.6))))
-					(assert (new_goal (goal Supreme-Health-P-PLUS) (cf (* ?cf-Supreme-Health-P-PLUS -0.6))))
-					(assert (new_goal (goal B-PLUS-SILVER) (cf (* ?cf-Supreme-Health-B-PLUS 0.6))))
-					(assert (new_goal (goal A-PLUS-GOLD) (cf (* ?cf-A-PLUS-GOLD 0.6))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-LITE) (cf (* ?cf-P-PLUS-PLATINUM-LITE 0.6))))
-					(assert (new_goal (goal P-PLUS-PLATINUM) (cf (* ?cf-P-PLUS-PLATINUM 0.6))))					
-		)
-		(case no then		
-					(assert (Critical-Care-Advantage-start start)))									;;; NOTE!!!
-	)
+;;; Supreme Health Policy (Comprehensive)
+;;; Determine Supreme Health Policy e.g. A, B or P Plus
+(defrule supremehealth-comprehensive-policy-conclusions
+	(standard-vs-holistic-ans holistic)
+	(hospital-ward-class-ans one)		    
+	(confinement-in-community-hospital-ans low)
+	(congenital-abnormalities-ans low)
+	(organ-transplant-ans low)
+	(psychiatric-treatment-ans low)
+	(final-expenses-benefit-ans low)
+	(annual-benefit-limit-ans low)
+	(complete-coverage-ans no)
+	(daily-cash-benefit-ans no)
+	(additional-plan-ans no)
+   =>
+	(handle-state conclusion (find-text-for-id supreme-health-B-plus) 0.9)
 )
 
-;; Do you prefer higher or lower hospital cash incentive? (Higher/Lower)
-(defrule hospital-cash-incentive-cf	
-	(current_fact (fact P-PLUS-PLATINUM-LITE) (cf ?cf-P-PLUS-PLATINUM-LITE))
-	(current_fact (fact P-PLUS-PLATINUM) (cf ?cf-P-PLUS-PLATINUM))
-	(hospital-cash-incentive-ans ?)
-=>	
-    (assert (Total-Health-Plus-start start))
-	(switch ?response
-		(case low then		(assert (new_goal (goal P-PLUS-PLATINUM-LITE) (cf (* ?cf-P-PLUS-PLATINUM-LITE 0.6)))))
-		(case high then		(assert (new_goal (goal P-PLUS-PLATINUM) (cf (* ?cf-P-PLUS-PLATINUM 0.6)))))
-	)
-)
-
-;;; Do you want to extend medical coverage worldwide?
-(defrule worldwide-medical-coverage-cf
-	(Total-Health-Plus-start start)
-	(current_fact (fact B-PLUS-SILVER) (cf ?cf-B-PLUS-SILVER))
-	(current_fact (fact A-PLUS-GOLD) (cf ?cf-A-PLUS-GOLD))
-	(current_fact (fact P-PLUS-PLATINUM-LITE) (cf ?cf-P-PLUS-PLATINUM-LITE))
-	(current_fact (fact P-PLUS-PLATINUM) (cf ?cf-P-PLUS-PLATINUM))
-	(current_fact (fact B-PLUS-SILVER-ESSENTIAL) (cf ?cf-B-PLUS-SILVER-ESSENTIAL))
-	(current_fact (fact B-PLUS-SILVER-ADVANCE) (cf ?cf-B-PLUS-SILVER-ADVANCE))
-	(current_fact (fact A-PLUS-GOLD-ESSENTIAL) (cf ?cf-A-PLUS-GOLD-ESSENTIAL))
-	(current_fact (fact A-PLUS-GOLD-ADVANCE) (cf ?cf-A-PLUS-GOLD-ADVANCE))
-	(current_fact (fact P-PLUS-PLATINUM-LITE-ESSENTIAL) (cf ?cf-P-PLUS-PLATINUM-LITE-ESSENTIAL))
-	(current_fact (fact P-PLUS-PLATINUM-LITE-ADVANCE) (cf ?cf-P-PLUS-PLATINUM-LITE-ADVANCE))
-	(current_fact (fact P-PLUS-PLATINUM-ESSENTIAL) (cf ?cf-P-PLUS-PLATINUM-ESSENTIAL))
-	(current_fact (fact P-PLUS-PLATINUM-ADVANCE) (cf ?cf-P-PLUS-PLATINUM-ADVANCE))
-    (worldwide-medical-coverage-qn ?response)
-=>	
-    (switch ?response
-		(case yes then		
-					(assert (new_goal (goal B-PLUS-SILVER) (cf (* ?cf-B-PLUS-SILVER -0.6))))
-					(assert (new_goal (goal A-PLUS-GOLD) (cf (* ?cf-A-PLUS-GOLD -0.6))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-LITE) (cf (* ?cf-P-PLUS-PLATINUM-LITE -0.6))))
-					(assert (new_goal (goal P-PLUS-PLATINUM) (cf (* ?cf-P-PLUS-PLATINUM -0.6))))
-					(assert (new_goal (goal B-PLUS-SILVER-ESSENTIAL) (cf (* ?cf-B-PLUS-SILVER-ESSENTIAL 0.6))))
-					(assert (new_goal (goal B-PLUS-SILVER-ADVANCE) (cf (* ?cf-B-PLUS-SILVER-ADVANCE 0.6))))
-					(assert (new_goal (goal A-PLUS-GOLD-ESSENTIAL) (cf (* ?cf-A-PLUS-GOLD-ESSENTIAL 0.6))))
-					(assert (new_goal (goal A-PLUS-GOLD-ADVANCE) (cf (* ?cf-A-PLUS-GOLD-ADVANCE 0.6))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-LITE-ESSENTIAL) (cf (* ?cf-P-PLUS-PLATINUM-LITE-ESSENTIAL 0.6))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-LITE-ADVANCE) (cf (* ?cf-P-PLUS-PLATINUM-LITE-ADVANCE 0.6))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-ESSENTIAL) (cf (* ?cf-P-PLUS-PLATINUM-ESSENTIAL 0.6))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-ADVANCE) (cf (* ?cf-P-PLUS-PLATINUM-ADVANCE 0.6))))
-					(assert (new_goal (goal B-PLUS-SILVER-ESSENTIAL) (cf ?cf-B-PLUS-SILVER)))					;;; ERROR!!!
-					(assert (new_goal (goal B-PLUS-SILVER-ADVANCE) (cf ?cf-B-PLUS-SILVER)))						;;; ERROR!!!
-					(assert (new_goal (goal A-PLUS-GOLD-ESSENTIAL) (cf ?cf-A-PLUS-GOLD)))						;;; ERROR!!!
-					(assert (new_goal (goal A-PLUS-GOLD-ADVANCE) (cf ?cf-A-PLUS-GOLD)))						;;; ERROR!!!
-					(assert (new_goal (goal P-PLUS-PLATINUM-LITE-ESSENTIAL) (cf ?cf-P-PLUS-PLATINUM-LITE)))				;;; ERROR!!!
-					(assert (new_goal (goal P-PLUS-PLATINUM-LITE-ADVANCE) (cf ?cf-P-PLUS-PLATINUM-LITE)))				;;; ERROR!!!
-					(assert (new_goal (goal P-PLUS-PLATINUM-ESSENTIAL) (cf ?cf-P-PLUS-PLATINUM)))					;;; ERROR!!!
-					(assert (new_goal (goal P-PLUS-PLATINUM-ADVANCE) (cf ?cf-P-PLUS-PLATINUM)))					;;; ERROR!!!
-		)
-		(case no then		(assert (Critical-Care-Advantage-start start)))									;;; NOTE!!!
-	)
-)
-
-;;; Daily Hospital Income Benefit
-;;; Do you prefer higher or lower daily hospital income benefit?
-(defrule daily-hospital-income-benefit-cf
-	(complete-coverage-ans yes)
-	(hospital-cash-incentive-ans ?)
-	(worldwide-medical-coverage-ans yes)
-	(current_fact (fact B-PLUS-SILVER-ESSENTIAL) (cf ?cf-B-PLUS-SILVER-ESSENTIAL))
-	(current_fact (fact B-PLUS-SILVER-ADVANCE) (cf ?cf-B-PLUS-SILVER-ADVANCE))
-	(current_fact (fact A-PLUS-GOLD-ESSENTIAL) (cf ?cf-A-PLUS-GOLD-ESSENTIAL))
-	(current_fact (fact A-PLUS-GOLD-ADVANCE) (cf ?cf-A-PLUS-GOLD-ADVANCE))
-	(current_fact (fact P-PLUS-PLATINUM-LITE-ESSENTIAL) (cf ?cf-P-PLUS-PLATINUM-LITE-ESSENTIAL))
-	(current_fact (fact P-PLUS-PLATINUM-LITE-ADVANCE) (cf ?cf-P-PLUS-PLATINUM-LITE-ADVANCE))
-	(current_fact (fact P-PLUS-PLATINUM-ESSENTIAL) (cf ?cf-P-PLUS-PLATINUM-ESSENTIAL))
-	(current_fact (fact P-PLUS-PLATINUM-ADVANCE) (cf ?cf-P-PLUS-PLATINUM-ADVANCE))
-    (daily-hospital-income-benefit-ans ?response)
-=>	
-    (switch ?response
-		(case low then	
-                    (assert (new_goal (goal B-PLUS-SILVER-ESSENTIAL) (cf (* ?cf-B-PLUS-SILVER-ESSENTIAL 0.4))))
-					(assert (new_goal (goal A-PLUS-GOLD-ESSENTIAL) (cf (* ?cf-A-PLUS-GOLD-ESSENTIAL 0.4))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-LITE-ESSENTIAL) (cf (* ?cf-P-PLUS-PLATINUM-LITE-ESSENTIAL 0.4))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-ESSENTIAL) (cf (* ?cf-P-PLUS-PLATINUM-ESSENTIAL 0.4)))))
-		(case high then	
-                    (assert (new_goal (goal B-PLUS-SILVER-ADVANCE) (cf (* ?cf-B-PLUS-SILVER-ADVANCE 0.4))))
-					(assert (new_goal (goal A-PLUS-GOLD-ADVANCE) (cf (* ?cf-A-PLUS-GOLD-ADVANCE 0.4))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-LITE-ADVANCE) (cf (* ?cf-P-PLUS-PLATINUM-LITE-ADVANCE 0.4))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-ADVANCE) (cf (* ?cf-P-PLUS-PLATINUM-ADVANCE 0.4)))))
-	)
-)
-
-
-;;; Cancer Treatment
-(defrule cancer-treatment-cf
-	(current_fact (fact B-PLUS-SILVER-ESSENTIAL) (cf ?cf-B-PLUS-SILVER-ESSENTIAL))
-	(current_fact (fact B-PLUS-SILVER-ADVANCE) (cf ?cf-B-PLUS-SILVER-ADVANCE))
-	(current_fact (fact A-PLUS-GOLD-ESSENTIAL) (cf ?cf-A-PLUS-GOLD-ESSENTIAL))
-	(current_fact (fact A-PLUS-GOLD-ADVANCE) (cf ?cf-A-PLUS-GOLD-ADVANCE))
-	(current_fact (fact P-PLUS-PLATINUM-LITE-ESSENTIAL) (cf ?cf-P-PLUS-PLATINUM-LITE-ESSENTIAL))
-	(current_fact (fact P-PLUS-PLATINUM-LITE-ADVANCE) (cf ?cf-P-PLUS-PLATINUM-LITE-ADVANCE))
-	(current_fact (fact P-PLUS-PLATINUM-ESSENTIAL) (cf ?cf-P-PLUS-PLATINUM-ESSENTIAL))
-	(current_fact (fact P-PLUS-PLATINUM-ADVANCE) (cf ?cf-P-PLUS-PLATINUM-ADVANCE))
-    (cancer-treatment-ans ?response)
-=>	
-	(switch ?response
-		(case low then	
-                    (assert (new_goal (goal B-PLUS-SILVER-ESSENTIAL) (cf (* ?cf-B-PLUS-SILVER-ESSENTIAL 0.4))))
-					(assert (new_goal (goal A-PLUS-GOLD-ESSENTIAL) (cf (* ?cf-A-PLUS-GOLD-ESSENTIAL 0.4))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-LITE-ESSENTIAL) (cf (* ?cf-P-PLUS-PLATINUM-LITE-ESSENTIAL 0.4))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-ESSENTIAL) (cf (* ?cf-P-PLUS-PLATINUM-ESSENTIAL 0.4)))))
-		(case high then	
-                    (assert (new_goal (goal B-PLUS-SILVER-ADVANCE) (cf (* ?cf-B-PLUS-SILVER-ADVANCE 0.4))))
-					(assert (new_goal (goal A-PLUS-GOLD-ADVANCE) (cf (* ?cf-A-PLUS-GOLD-ADVANCE 0.4))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-LITE-ADVANCE) (cf (* ?cf-P-PLUS-PLATINUM-LITE-ADVANCE 0.4))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-ADVANCE) (cf (* ?cf-P-PLUS-PLATINUM-ADVANCE 0.4)))))
-	)
-)
-
-;;; Emergency Assistance Services
-(defrule emergency-assistance-services-cf	
-	(current_fact (fact B-PLUS-SILVER-ESSENTIAL) (cf ?cf-B-PLUS-SILVER-ESSENTIAL))
-	(current_fact (fact B-PLUS-SILVER-ADVANCE) (cf ?cf-B-PLUS-SILVER-ADVANCE))
-	(current_fact (fact A-PLUS-GOLD-ESSENTIAL) (cf ?cf-A-PLUS-GOLD-ESSENTIAL))
-	(current_fact (fact A-PLUS-GOLD-ADVANCE) (cf ?cf-A-PLUS-GOLD-ADVANCE))
-	(current_fact (fact P-PLUS-PLATINUM-LITE-ESSENTIAL) (cf ?cf-P-PLUS-PLATINUM-LITE-ESSENTIAL))
-	(current_fact (fact P-PLUS-PLATINUM-LITE-ADVANCE) (cf ?cf-P-PLUS-PLATINUM-LITE-ADVANCE))
-	(current_fact (fact P-PLUS-PLATINUM-ESSENTIAL) (cf ?cf-P-PLUS-PLATINUM-ESSENTIAL))
-	(current_fact (fact P-PLUS-PLATINUM-ADVANCE) (cf ?cf-P-PLUS-PLATINUM-ADVANCE))
-	(emergency-assistance-services-ans ?response)
-=>	
-	(switch ?response
-		(case no then	(assert (new_goal (goal B-PLUS-SILVER-ESSENTIAL) (cf (* ?cf-B-PLUS-SILVER-ESSENTIAL 0.4))))
-					(assert (new_goal (goal A-PLUS-GOLD-ESSENTIAL) (cf (* ?cf-A-PLUS-GOLD-ESSENTIAL 0.4))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-LITE-ESSENTIAL) (cf (* ?cf-P-PLUS-PLATINUM-LITE-ESSENTIAL 0.4))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-ESSENTIAL) (cf (* ?cf-P-PLUS-PLATINUM-ESSENTIAL 0.4)))))
-		(case yes then	(assert (new_goal (goal B-PLUS-SILVER-ADVANCE) (cf (* ?cf-B-PLUS-SILVER-ADVANCE 0.4))))
-					(assert (new_goal (goal A-PLUS-GOLD-ADVANCE) (cf (* ?cf-A-PLUS-GOLD-ADVANCE 0.4))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-LITE-ADVANCE) (cf (* ?cf-P-PLUS-PLATINUM-LITE-ADVANCE 0.4))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-ADVANCE) (cf (* ?cf-P-PLUS-PLATINUM-ADVANCE 0.4)))))
-	)
-)
-
-;;; Additional Annual Benefit Limit
-(defrule additional-annual-benefit-limit-cf	
-	(current_fact (fact B-PLUS-SILVER-ESSENTIAL) (cf ?cf-B-PLUS-SILVER-ESSENTIAL))
-	(current_fact (fact B-PLUS-SILVER-ADVANCE) (cf ?cf-B-PLUS-SILVER-ADVANCE))
-	(current_fact (fact A-PLUS-GOLD-ESSENTIAL) (cf ?cf-A-PLUS-GOLD-ESSENTIAL))
-	(current_fact (fact A-PLUS-GOLD-ADVANCE) (cf ?cf-A-PLUS-GOLD-ADVANCE))
-	(current_fact (fact P-PLUS-PLATINUM-LITE-ESSENTIAL) (cf ?cf-P-PLUS-PLATINUM-LITE-ESSENTIAL))
-	(current_fact (fact P-PLUS-PLATINUM-LITE-ADVANCE) (cf ?cf-P-PLUS-PLATINUM-LITE-ADVANCE))
-	(current_fact (fact P-PLUS-PLATINUM-ESSENTIAL) (cf ?cf-P-PLUS-PLATINUM-ESSENTIAL))
-	(current_fact (fact P-PLUS-PLATINUM-ADVANCE) (cf ?cf-P-PLUS-PLATINUM-ADVANCE))
-	(additional-annual-benefit-limit-ans ?response)
-=>		
-	(switch ?response
-		(case low then	(assert (new_goal (goal B-PLUS-SILVER-ESSENTIAL) (cf (* ?cf-B-PLUS-SILVER-ESSENTIAL 0.4))))
-					(assert (new_goal (goal A-PLUS-GOLD-ESSENTIAL) (cf (* ?cf-A-PLUS-GOLD-ESSENTIAL 0.4))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-LITE-ESSENTIAL) (cf (* ?cf-P-PLUS-PLATINUM-LITE-ESSENTIAL 0.4))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-ESSENTIAL) (cf (* ?cf-P-PLUS-PLATINUM-ESSENTIAL 0.4)))))
-		(case high then	(assert (new_goal (goal B-PLUS-SILVER-ADVANCE) (cf (* ?cf-B-PLUS-SILVER-ADVANCE 0.4))))
-					(assert (new_goal (goal A-PLUS-GOLD-ADVANCE) (cf (* ?cf-A-PLUS-GOLD-ADVANCE 0.4))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-LITE-ADVANCE) (cf (* ?cf-P-PLUS-PLATINUM-LITE-ADVANCE 0.4))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-ADVANCE) (cf (* ?cf-P-PLUS-PLATINUM-ADVANCE 0.4)))))
-	)
-)
-
-;;; Additional Lifetime Benefit Limit
-(defrule additional-lifetime-benefit-limit-cf	
-	(current_fact (fact B-PLUS-SILVER-ESSENTIAL) (cf ?cf-B-PLUS-SILVER-ESSENTIAL))
-	(current_fact (fact B-PLUS-SILVER-ADVANCE) (cf ?cf-B-PLUS-SILVER-ADVANCE))
-	(current_fact (fact A-PLUS-GOLD-ESSENTIAL) (cf ?cf-A-PLUS-GOLD-ESSENTIAL))
-	(current_fact (fact A-PLUS-GOLD-ADVANCE) (cf ?cf-A-PLUS-GOLD-ADVANCE))
-	(current_fact (fact P-PLUS-PLATINUM-LITE-ESSENTIAL) (cf ?cf-P-PLUS-PLATINUM-LITE-ESSENTIAL))
-	(current_fact (fact P-PLUS-PLATINUM-LITE-ADVANCE) (cf ?cf-P-PLUS-PLATINUM-LITE-ADVANCE))
-	(current_fact (fact P-PLUS-PLATINUM-ESSENTIAL) (cf ?cf-P-PLUS-PLATINUM-ESSENTIAL))
-	(current_fact (fact P-PLUS-PLATINUM-ADVANCE) (cf ?cf-P-PLUS-PLATINUM-ADVANCE))
-	(additional-lifetime-benefit-limit-ans ?response)
-=>	
-	(assert (Supreme-MediCash-start start))
-	(switch ?response
-		(case lower then	(assert (new_goal (goal B-PLUS-SILVER-ESSENTIAL) (cf (* ?cf-B-PLUS-SILVER-ESSENTIAL 0.4))))
-					(assert (new_goal (goal A-PLUS-GOLD-ESSENTIAL) (cf (* ?cf-A-PLUS-GOLD-ESSENTIAL 0.4))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-LITE-ESSENTIAL) (cf (* ?cf-P-PLUS-PLATINUM-LITE-ESSENTIAL 0.4))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-ESSENTIAL) (cf (* ?cf-P-PLUS-PLATINUM-ESSENTIAL 0.4)))))
-		(case higher then	(assert (new_goal (goal B-PLUS-SILVER-ADVANCE) (cf (* ?cf-B-PLUS-SILVER-ADVANCE 0.4))))
-					(assert (new_goal (goal A-PLUS-GOLD-ADVANCE) (cf (* ?cf-A-PLUS-GOLD-ADVANCE 0.4))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-LITE-ADVANCE) (cf (* ?cf-P-PLUS-PLATINUM-LITE-ADVANCE 0.4))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-ADVANCE) (cf (* ?cf-P-PLUS-PLATINUM-ADVANCE 0.4)))))
-	)
-)
-
-
-;;; Do you want daily cash benefit for each day spend in hospital?
-(defrule daily-cash-benefit-cf
-	(Supreme-MediCash-start start)
-	(current_fact (fact Supreme-MediCash-Plan-A) (cf ?cf-Supreme-MediCash-Plan-A))
-	(current_fact (fact Supreme-MediCash-Plan-B) (cf ?cf-Supreme-MediCash-Plan-B))
-	(current_fact (fact Supreme-MediCash-Plan-C) (cf ?cf-Supreme-MediCash-Plan-C))
-	(daily-cash-benefit-ans ?response)
-=>	
-	(switch ?response
-		(case yes then		(assert (daily-cash-benefit-ans ?response))
-					(assert (new_goal (goal Supreme-MediCash-Plan-A) (cf (* ?cf-Supreme-MediCash-Plan-A 0.6))))
-					(assert (new_goal (goal Supreme-MediCash-Plan-B) (cf (* ?cf-Supreme-MediCash-Plan-B 0.6))))
-					(assert (new_goal (goal Supreme-MediCash-Plan-C) (cf (* ?cf-Supreme-MediCash-Plan-C 0.6)))))
-		(case no then		(assert (Critical-Care-Advantage start)))									;;; NOTE!!!
-	)
-)
-
-;;; Daily Hospital Cash Benefit - Illness
-(defrule daily-hospital-cash-benefit-illness-cf
-	(daily-cash-benefit-ans yes)
-	(current_fact (fact Supreme-MediCash-Plan-A) (cf ?cf-Supreme-MediCash-Plan-A))
-	(current_fact (fact Supreme-MediCash-Plan-B) (cf ?cf-Supreme-MediCash-Plan-B))
-	(current_fact (fact Supreme-MediCash-Plan-C) (cf ?cf-Supreme-MediCash-Plan-C))
-	(daily-hospital-cash-benefit-illness-ans ?response)
-=>	
-	(switch ?response
-		(case low then		(assert (new_goal (goal Supreme-MediCash-Plan-A) (cf (* ?cf-Supreme-MediCash-Plan-A 0.3)))))
-		(case medium then	(assert (new_goal (goal Supreme-MediCash-Plan-B) (cf (* ?cf-Supreme-MediCash-Plan-B 0.3)))))
-		(case high then		(assert (new_goal (goal Supreme-MediCash-Plan-C) (cf (* ?cf-Supreme-MediCash-Plan-C 0.3)))))
-	)
-)
-
-;;; Daily Hospital Cash Benefit - Accident
-(defrule daily-hospital-cash-benefit-accident-cf
-	(daily-cash-benefit-ans yes)
-	(current_fact (fact Supreme-MediCash-Plan-A) (cf ?cf-Supreme-MediCash-Plan-A))
-	(current_fact (fact Supreme-MediCash-Plan-B) (cf ?cf-Supreme-MediCash-Plan-B))
-	(current_fact (fact Supreme-MediCash-Plan-C) (cf ?cf-Supreme-MediCash-Plan-C))
-	(daily-hospital-cash-benefit-accident-ans ?response)
-=>		
-	(switch ?response
-		(case low then		(assert (new_goal (goal Supreme-MediCash-Plan-A) (cf (* ?cf-Supreme-MediCash-Plan-A 0.4)))))
-		(case medium then	(assert (new_goal (goal Supreme-MediCash-Plan-B) (cf (* ?cf-Supreme-MediCash-Plan-B 0.4)))))
-		(case high then		(assert (new_goal (goal Supreme-MediCash-Plan-C) (cf (* ?cf-Supreme-MediCash-Plan-C 0.4)))))
-	)
-)
-
-;;; Daily Hospital Cash Benefit - ICU
-(defrule daily-hospital-cash-benefit-ICU-cf
-	(daily-cash-benefit-ans yes)
-	(current_fact (fact Supreme-MediCash-Plan-A) (cf ?cf-Supreme-MediCash-Plan-A))
-	(current_fact (fact Supreme-MediCash-Plan-B) (cf ?cf-Supreme-MediCash-Plan-B))
-	(current_fact (fact Supreme-MediCash-Plan-C) (cf ?cf-Supreme-MediCash-Plan-C))
-	(daily-hospital-cash-benefit-ICU-ans ?response)
-=>		
-	(switch ?response
-		(case low then		(assert (new_goal (goal Supreme-MediCash-Plan-A) (cf (* ?cf-Supreme-MediCash-Plan-A 0.5)))))
-		(case medium then	(assert (new_goal (goal Supreme-MediCash-Plan-B) (cf (* ?cf-Supreme-MediCash-Plan-B 0.5)))))
-		(case high then		(assert (new_goal (goal Supreme-MediCash-Plan-C) (cf (* ?cf-Supreme-MediCash-Plan-C 0.5)))))
-	)	
-)
-
-;;; Recuperation Benefit - Non-Surgical Hospitalisation
-(defrule recuperation-benefit-non-surgical-hospitalisation-cf
-	(daily-cash-benefit-ans yes)
-	(current_fact (fact Supreme-MediCash-Plan-A) (cf ?cf-Supreme-MediCash-Plan-A))
-	(current_fact (fact Supreme-MediCash-Plan-B) (cf ?cf-Supreme-MediCash-Plan-B))
-	(current_fact (fact Supreme-MediCash-Plan-C) (cf ?cf-Supreme-MediCash-Plan-C))
-	(recuperation-benefit-non-surgical-hospitalisation ?response)
-=>	
-	(switch ?response
-		(case low then		(assert (new_goal (goal Supreme-MediCash-Plan-A) (cf (* ?cf-Supreme-MediCash-Plan-A 0.3)))))
-		(case medium then	(assert (new_goal (goal Supreme-MediCash-Plan-B) (cf (* ?cf-Supreme-MediCash-Plan-B 0.3)))))
-		(case high then		(assert (new_goal (goal Supreme-MediCash-Plan-C) (cf (* ?cf-Supreme-MediCash-Plan-C 0.3)))))
-	)
-)
-
-;;; Recuperation Benefit - Post Surgery
-(defrule recuperation-benefit-post-surgery-cf
-	(daily-cash-benefit-ans yes)
-	(current_fact (fact Supreme-MediCash-Plan-A) (cf ?cf-Supreme-MediCash-Plan-A))
-	(current_fact (fact Supreme-MediCash-Plan-B) (cf ?cf-Supreme-MediCash-Plan-B))
-	(current_fact (fact Supreme-MediCash-Plan-C) (cf ?cf-Supreme-MediCash-Plan-C))
-	(recuperation-benefit-post-surgery-ans ?response)
-=>	
-	(assert (Critical-Care-Advantage-start start))													;;; NOTE!!!
-	(switch ?response
-		(case low then		(assert (new_goal (goal Supreme-MediCash-Plan-A) (cf (* ?cf-Supreme-MediCash-Plan-A 0.5)))))
-		(case medium then	(assert (new_goal (goal Supreme-MediCash-Plan-B) (cf (* ?cf-Supreme-MediCash-Plan-B 0.5)))))
-		(case high then		(assert (new_goal (goal Supreme-MediCash-Plan-C) (cf (* ?cf-Supreme-MediCash-Plan-C 0.5)))))
-	)
-)
 
 ;;;********************
 ;;;* CONCLUSIONS *
@@ -1394,53 +979,20 @@
    (assert (no-conclusion true))
 )
 
-;;; Supreme Health A-Plus
-(defrule supreme-health-aplus-exists ""
-       (current_goal (goal Supreme-Health-A-PLUS) (cf ?cf-shs))
+;;; Supreme Health B-Plus and Total Health Silver
+(defrule supreme-health-b-plus-silver-exists ""
+       (current_goal (goal B-PLUS-SILVER) (cf ?cf-shs))	   
+	   (conclude-recommendation true)
    =>
-       (if (>= ?cf-shs 0.9) then
-            (handle-state conclusion (find-text-for-id supreme-health-A-plus) ?cf-shs)
-       )
+       (handle-state conclusion (find-text-for-id supreme-health-B-plus-silver) ?cf-shs)
 )
 
-;;; Supreme Health B-Plus
-(defrule supreme-health-bplus-exists ""
-       (current_goal (goal Supreme-Health-B-PLUS) (cf ?cf-shs))
+;;; Supreme Health Standard-Plan and Critical-Care-Advantage
+(defrule supreme-health-standard-criticalcare-exists ""
+       (current_goal (goal supreme-health-standard-criticalcare) (cf ?cf-shs))
+	   (conclude-recommendation true)
    =>
-       (if (>= ?cf-shs 0.7) then
-            (handle-state conclusion (find-text-for-id supreme-health-B-plus) ?cf-shs)
-       )
-)
-
-;;; Supreme Health B Plus, Total Health SILVER, Total Health Plus ESSENTIAL
-(defrule supreme-health-bplus-exists ""
-       (current_goal (goal B-PLUS-SILVER-ESSENTIAL) (cf ?cf-shs))
-   =>
-       (if (>= ?cf-shs 0.7) then
-            (handle-state conclusion (find-text-for-id supreme-health-B-plus-silver-essential) ?cf-shs)
-       )
-)
-
-;;; Supreme Health P-Plus
-(defrule supreme-health-pplus-exists ""
-      (current_goal (goal Supreme-Health-P-PLUS) (cf ?cf-shs))
-   =>
-       (if (>= ?cf-shs 0.7) then
-            (handle-state conclusion (find-text-for-id supreme-health-P-plus) ?cf-shs)
-       )
-)
-
-
-(defrule health-standard-medicashplanA-exists ""
-       (current_goal (goal supreme-health-standard-medicash-A) (cf ?cf-sma))
-   =>
-       (handle-state conclusion (find-text-for-id supreme-health-standard-medicash-A) ?cf-sma)
-)
-
-(defrule health-B-plus-criticalcare-exists ""
-       (current_goal (goal supreme-health-B-plus-criticalcare) (cf ?cf-shbp))
-   =>
-       (handle-state conclusion (find-text-for-id supreme-health-B-plus-criticalcare) ?cf-shbp)
+       (handle-state conclusion (find-text-for-id supreme-health-standard-criticalcare) ?cf-shs)
 )
 
 ;;; if income below 2k, married, no need to recommend
