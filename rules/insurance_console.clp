@@ -1,5 +1,6 @@
 ;;; ***************************
 ;;; * DEFTEMPLATES & DEFFACTS *
+;;; History
 ;;; ***************************
 
 ;; to store the current goal e.g. health insurance plans
