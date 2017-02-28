@@ -179,6 +179,27 @@
 	(assert (marital-status ?response))
 )
 
+;; Smoking
+(defrule determine-smoking
+    (marital-status ?)
+    (not (smoking ?))
+   =>   
+    (printout t crlf "Are you smoking? (y)es/(n)o")
+	(bind ?response (read))
+	(assert (smoking ?response))
+)
+
+;; Regular exercise
+(defrule determine-exercise
+    (smoking ?)
+    (not (regular-exercise ?))
+   =>   
+    (printout t crlf "Do you exercise regularly? (y)es/(n)o")
+	(bind ?response (read))
+	(assert (regular-exercise ?response))
+)
+
+
 ;;; Do you prefer a standard hospitalisation plan or a comprehensive hospitalisation plan?
 (defrule standard-vs-comprehensive-qn
 	(current_fact (fact Supreme-Health-Standard-Plan) (cf ?cf-Supreme-Health-Standard-Plan))
@@ -333,7 +354,7 @@
 					(assert (new_goal (goal P-PLUS-PLATINUM-LITE) (cf ?cf-Supreme-Health-P-PLUS)))					;;; ERROR!!!
 					(assert (new_goal (goal P-PLUS-PLATINUM) (cf ?cf-Supreme-Health-P-PLUS)))					;;; ERROR!!!
 		)
-		(case No then		(assert (Critical-Care-Advantage-start start)))									;;; NOTE!!!
+		(case No then		(assert (Critical-Care-Advantage start)))									;;; NOTE!!!
 	)
 )
 
@@ -660,6 +681,20 @@
 		(case n then (assert (new_goal (goal Critical-Care-Advantage) (cf (* ?cf-Critical-Care-Advantage 0.5)))))
 	)
 )
+
+(defrule medical-condition ""
+   (travel-frequency ?)
+   (not (medical-condition ?))
+   (current_fact (fact Critical-Care-Advantage) (cf ?cf-Critical-Care-Advantage))
+   =>
+    (printout t crlf "Do you have any existing medical condition? (y)es/(n)o")
+	(bind ?response (read))
+	(assert(medical-condition ?response))
+	(if(eq ?response y)
+		then (assert (new_goal (goal Critical-Care-Advantage) (cf (* ?cf-Critical-Care-Advantage 0.8))))
+    )
+)
+
 
 ;;; Recommendation
 (defrule compile_recomendations
