@@ -1,6 +1,5 @@
 ;;; ***************************
 ;;; * DEFTEMPLATES & DEFFACTS *
-;;; History
 ;;; ***************************
 
 ;; to store the current goal e.g. health insurance plans
@@ -155,7 +154,7 @@
 (defrule age-qn
 	(gender ?)
 	(not (age ?))
-=>	(printout t crlf "Please tell us your age range: (1) below 17 (2) between 17 and 55 (3) above 55")
+=>	(printout t crlf "Please tell us your age range: (1) below 17 (2) between 18 and 39 (3) between 40 and 45 (4) above 46")
 	(bind ?response (read))
 	(assert (age ?response))
 )
