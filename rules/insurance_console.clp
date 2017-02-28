@@ -30,7 +30,10 @@
 	(slot Supreme-MediCash-Plan-B)
 	(slot Supreme-MediCash-Plan-C)
 	(slot Critical-Care-Advantage)
-)
+	(slot Basic_ElderShield)
+	(slot ElderShield_Comprehensive-3ADL)
+	(slot ElderShield_Comprehensive-2ADL)
+	)
 
 (deffacts load-facts
 	(current_fact (fact Supreme-Health-Standard-Plan) (cf 0.5))
@@ -53,7 +56,10 @@
 	(current_fact (fact Supreme-MediCash-Plan-B) (cf 0.5))
 	(current_fact (fact Supreme-MediCash-Plan-C) (cf 0.5))
 	(current_fact (fact Critical-Care-Advantage) (cf 0.5))
-
+;	(current_fact (fact ADL) (cf 0.0))
+;	(current_fact (fact payout_>6years) (cf 0.0))
+;	(current_fact (fact payout_amount_>400) (cf 0.0))	
+	
 	(current_goal (goal Supreme-Health-Standard-Plan) (cf 0.5))
 	(current_goal (goal Supreme-Health-B-PLUS) (cf 0.5))
 	(current_goal (goal Supreme-Health-A-PLUS) (cf 0.5))
@@ -74,6 +80,9 @@
 	(current_goal (goal Supreme-MediCash-Plan-B) (cf 0.5))
 	(current_goal (goal Supreme-MediCash-Plan-C) (cf 0.5))	
 	(current_goal (goal Critical-Care-Advantage) (cf 0.5))
+;	(current_goal (goal Basic_ElderShield) (cf 0.5))
+;	(current_goal (goal ElderShield_Comprehensive-3ADL) (cf 0.5))
+;	(current_goal (goal ElderShield_Comprehensive-2ADL) (cf 0.5))
 )
 
 (defrule initialise-current-goal
@@ -718,6 +727,10 @@
 	(current_goal (goal Supreme-MediCash-Plan-B) (cf ?cf-Supreme-MediCash-Plan-B))
 	(current_goal (goal Supreme-MediCash-Plan-C) (cf ?cf-Supreme-MediCash-Plan-C))
 	(current_goal (goal Critical-Care-Advantage) (cf ?cf-Critical-Care-Advantage))
+	(current_goal (goal Basic_ElderShield) (cf ?cf-basic))
+	(current_goal (goal ElderShield_Comprehensive-3ADL) (cf ?cf-3adl))
+	(current_goal (goal ElderShield_Comprehensive-2ADL) (cf ?cf-2adl))
+	
 =>	(assert (recommendation
 		(Supreme-Health-Standard-Plan ?cf-Supreme-Health-Standard-Plan)
 		(Supreme-Health-B-PLUS ?cf-Supreme-Health-B-PLUS)
@@ -739,6 +752,9 @@
 		(Supreme-MediCash-Plan-B ?cf-Supreme-MediCash-Plan-B)
 		(Supreme-MediCash-Plan-C ?cf-Supreme-MediCash-Plan-C)
 		(Critical-Care-Advantage ?cf-Critical-Care-Advantage)
+		(Basic_ElderShield ?cf-basic) 
+		(ElderShield_Comprehensive-3ADL ?cf-3adl) 
+		(ElderShield_Comprehensive-2ADL ?cf-2adl)		
 	))
 
 	(printout t crlf "Recommendation:")
@@ -762,6 +778,160 @@
 	(printout t crlf "Supreme-MediCash-Plan-B: " ?cf-Supreme-MediCash-Plan-B)
 	(printout t crlf "Supreme-MediCash-Plan-C: " ?cf-Supreme-MediCash-Plan-C crlf)
 	(printout t crlf "Critical-Care-Advantage: " ?cf-Critical-Care-Advantage crlf)
+	(printout t crlf "Basic ElderShield               : " (integer (* ?cf-basic 100)) "%")
+	(printout t crlf "ElderShield Comprehensive 3 ADLs: " (integer (* ?cf-3adl 100)) "%")
+	(printout t crlf "ElderShield Comprehensive 2 ADLs: " (integer (* ?cf-2adl 100)) "%" crlf)
+)
+
+
+
+
+;;;***********************************************************
+;;;	Long Term Care Plan
+;;;***********************************************************
+
+;;;Rule 1
+;; Are you >= 40 years old?
+(defrule age>=40-years-old 
+	(age ?a)
+	=>
+	(switch ?a
+		(case 1 then	(assert (current_fact (fact age) (cf -1.0))))
+		(case 2 then	(assert (current_fact (fact age) (cf -1.0))))
+		(case 3 then	(assert (current_fact (fact age) (cf 1.0))))
+		(case 4 then	(assert (current_fact (fact age) (cf 1.0))))
+	)
+)
+
+
+;;;Rule 2
+;; Are you Singapore Citizen or Singapore PR?
+(defrule citizenship=SC_SPR
+	(current_fact (fact age) (cf 1.0))
+=>	(printout t "Singapore Citizen or Singapore PR? (y)es/(n)o" crlf)
+	(bind ?answer (read))
+	(if (eq ?answer y) 
+	then
+		(assert (current_fact (fact citizenship) (cf 1.0)))
+	else
+		(assert (current_fact (fact citizenship) (cf -1.0)))	
+	)
+)
+
+
+;;;Rule 3
+;; Do you have any pre-existing disability?
+(defrule pre-existing-disability-yes
+	(current_fact (fact age) (cf 1.0))
+	(current_fact (fact citizenship) (cf 1.0))
+=>	(printout t "Do you have any pre-existing disability? (y)es/(n)o" crlf)
+	(bind ?answer (read))
+	(if (eq ?answer n) 
+	then
+		(assert (current_fact (fact no_disability) (cf 1.0)))
+	else
+		(assert (current_fact (fact no_disability) (cf -1.0)))	
+	)
+)
+
+
+;Rule 4
+;; Do you want payout to commence when unable to perform 2 instead of 3 ADLs?
+(defrule want-payout-commence-2-ADL
+	(current_fact (fact age) (cf 1.0))
+	(current_fact (fact citizenship) (cf 1.0))
+	(current_fact (fact no_disability) (cf 1.0))
+
+=>	(printout t "Do you want payout to commence when unable to perform 2 instead of 3 ADL (Activities of Daily Living)? (y)es/(n)o" crlf)
+	(bind ?answer (read))
+	(if (eq ?answer y) 
+	then
+    	(assert(current_fact (fact ADL) (cf 1.0)))
+	else
+		(assert(current_fact (fact ADL) (cf 0.0)))
+	)
+)
+
+
+;Rule 5
+;; Do you want payout for > 6 years? 
+(defrule want-payout->6-years
+	(current_fact (fact age) (cf 1.0))
+	(current_fact (fact citizenship) (cf 1.0))
+	(current_fact (fact no_disability) (cf 1.0))
+
+=>	(printout t "Do you want payout for > 6 years? (y)es/(n)o" crlf)
+	(bind ?answer (read))
+	(if (eq ?answer y) 
+	then
+		(assert (current_fact (fact payout_>6years) (cf 1.0)))
+	else
+		(assert (current_fact (fact payout_>6years) (cf 0.0)))
+	)
+)
+
+
+;Rule 6
+;; Do you want payout amount of > $400?
+(defrule want-payout-amount->400
+	(current_fact (fact age) (cf 1.0))
+	(current_fact (fact citizenship) (cf 1.0))
+	(current_fact (fact no_disability) (cf 1.0))
+=>	(printout t "Do you want payout amount of > $400? (y)es/(n)o" crlf)
+	(bind ?answer (read))
+	(if (eq ?answer y) 
+	then
+		(assert (current_fact (fact payout_amount_>400) (cf 1.0)))
+	else
+		(assert (current_fact (fact payout_amount_>400) (cf 0.0)))
+	)
+)
+
+
+;;;*******************
+;;;* CONCLUSIONS *****
+;;;*******************
+
+(defrule conclusion-age-not-eligible-ElderShield
+	(current_fact (fact age) (cf -1.0))
+=> 
+	(printout t "Your age is not eligible for ElderShield Plan" crlf)
+	(assert (current_goal (goal Basic_ElderShield) (cf 0.0)))
+	(assert (current_goal (goal ElderShield_Comprehensive-3ADL) (cf 0.0)))
+	(assert (current_goal (goal ElderShield_Comprehensive-2ADL) (cf 0.0)))  
+)
+
+
+(defrule conclusion-citizenship-not-eligible-ElderShield
+   (current_fact (fact citizenship) (cf -1.0))
+=> 
+   (printout t "Your Citizenship is not eligible for ElderShield Plan" crlf)
+	(assert (current_goal (goal Basic_ElderShield) (cf 0.0)))
+	(assert (current_goal (goal ElderShield_Comprehensive-3ADL) (cf 0.0)))
+	(assert (current_goal (goal ElderShield_Comprehensive-2ADL) (cf 0.0)))  
+)
+
+
+(defrule conclusion-contact-insurance-adviser
+   (current_fact (fact no_disability) (cf -1.0))
+=> 
+   (printout t "Please contact your insurance adviser regarding your pre-existing disability condition." crlf)
+   	(assert (current_goal (goal Basic_ElderShield) (cf 0.0)))
+	(assert (current_goal (goal ElderShield_Comprehensive-3ADL) (cf 0.0)))
+	(assert (current_goal (goal ElderShield_Comprehensive-2ADL) (cf 0.0)))  
+)
+
+
+
+(defrule conclusion-ElderShield
+   (not(current_fact (fact age) (cf -1.0)))
+   (current_fact (fact ADL) (cf ?cf-adl))
+   (current_fact (fact payout_>6years) (cf ?cf-year))
+   (current_fact (fact payout_amount_>400) (cf ?cf-amount)) 
+   => 
+	(assert (current_goal (goal Basic_ElderShield) (cf (/ (+ (- 1.0 ?cf-adl) (- 1.0 ?cf-year) (- 1.0 ?cf-amount)) 3))))
+	(assert (current_goal (goal ElderShield_Comprehensive-3ADL) (cf (/ (+ (- 1.0 ?cf-adl) (+ 0.0 ?cf-year) (+ 0.0 ?cf-amount)) 3))))
+	(assert (current_goal (goal ElderShield_Comprehensive-2ADL) (cf (/ (+ (+ 0.0 ?cf-adl) (+ 0.0 ?cf-year) (+ 0.0 ?cf-amount)) 3))))  
 )
 
 
