@@ -33,6 +33,8 @@
 	(slot Basic_ElderShield)
 	(slot ElderShield_Comprehensive-3ADL)
 	(slot ElderShield_Comprehensive-2ADL)
+	(slot Flexi-Maternity-Cover-Enhanced)
+	(slot Flexi-Maternity-Cover-Essential)
 	)
 
 (defrule initialise-current-goal	
@@ -636,6 +638,8 @@
 	(current_goal (goal Basic_ElderShield) (cf ?cf-basic))
 	(current_goal (goal ElderShield_Comprehensive-3ADL) (cf ?cf-3adl))
 	(current_goal (goal ElderShield_Comprehensive-2ADL) (cf ?cf-2adl))
+	(current_goal (goal Flexi-Maternity-Cover-Enhanced) (cf ?cf-Flexi-Maternity-Cover-Enhanced))
+	(current_goal (goal Flexi-Maternity-Cover-Essential) (cf ?cf-Flexi-Maternity-Cover-Essential))
 	
 =>	(assert (recommendation
 		(Supreme-Health-Standard-Plan ?cf-Supreme-Health-Standard-Plan)
@@ -661,6 +665,8 @@
 		(Basic_ElderShield ?cf-basic) 
 		(ElderShield_Comprehensive-3ADL ?cf-3adl) 
 		(ElderShield_Comprehensive-2ADL ?cf-2adl)		
+		(Flexi-Maternity-Cover-Enhanced ?cf-Flexi-Maternity-Cover-Enhanced)
+		(Flexi-Maternity-Cover-Essential ?cf-Flexi-Maternity-Cover-Essential)
 	))
 
 	(printout t crlf "Recommendation:")
@@ -687,6 +693,8 @@
 	(printout t crlf "Basic ElderShield               : " (integer (* ?cf-basic 100)) "%")
 	(printout t crlf "ElderShield Comprehensive 3 ADLs: " (integer (* ?cf-3adl 100)) "%")
 	(printout t crlf "ElderShield Comprehensive 2 ADLs: " (integer (* ?cf-2adl 100)) "%" crlf)
+	(printout t crlf "Flexi Maternity Cover Enhanced Plan: " (integer (* ?cf-Flexi-Maternity-Cover-Enhanced 100)) "%" crlf)
+	(printout t crlf "Flexi Maternity Cover Essential Plan: " (integer (* ?cf-Flexi-Maternity-Cover-Essential 100)) "%" crlf)
 )
 
 ;;;***************************************************************
@@ -943,7 +951,104 @@
 	(assert (current_goal (goal ElderShield_Comprehensive-2ADL) (cf (/ (+ (+ 0.0 ?cf-adl) (+ 0.0 ?cf-year) (+ 0.0 ?cf-amount)) 3))))  
 )
 
+;;;***********************************************************
+;;;	Flexi Maternity Cover
+;;;***********************************************************
+
+;;if gender is female then ask whether is pregnant
+(defrule pregnant-qn
+    (gender f)
+    (or (age 2) (age 3))
+=> (printout t "Are you pregnant? (y)es/(n)o" crlf)
+   (bind ?is-pregnant (read))
+   (assert (is-pregnant ?is-pregnant)))
+   
+;;if pregnant then check pregnancy week
+(defrule ask-pregnant-week
+   (is-pregnant y)
+=> (printout t "Is your pregnancy between 13 to 40 weeks? (y)es/(n)o" crlf)
+   (bind ?stable-pregnant-week (read))
+   (assert (stable-pregnant-week ?stable-pregnant-week)))
+
+   
+;;if pregnant then check whether expecting carry more than 2 foetues
+(defrule ask-more-than-2-foetues
+   (stable-pregnant-week y)
+=> (printout t "Are you expecting more than 2 foetues? (y)es/(n)o" crlf)
+   (bind ?More-than-2-foetues (read))
+   (assert (More-than-2-foetues ?More-than-2-foetues))) 
 
 
+;;if pregnant then check whether is IVF
+(defrule ask-IVF
+   (More-than-2-foetues n)
+=> (printout t "Is your pregnancy as a result of IVF? (y)es/(n)o" crlf)
+   (bind ?IVF-answer (read))
+   (assert (IVF-answer ?IVF-answer)))
 
 
+;;if pregnancy is as a result of IVF
+(defrule accept-only-cover-baby
+   (IVF-answer y)
+=> (printout t "Are you fine with only cover your newborn child and not cover your pregnancy? (y)es/(n)o" crlf)
+   (bind ?can-accept-only-cover-baby (read))
+   (assert (can-accept-only-cover-baby ?can-accept-only-cover-baby)))
+
+;;if female whose age betwen 18 to 45 and 13th - 40th weeks pregnancy and expect not more than two foetuses and can accept only cover baby if IVF then eligible to buy
+;;
+(defrule Check-eligible
+   (or (IVF-answer n)
+   (can-accept-only-cover-baby y))  
+=>(printout t "Eligible to buy flexi maternity cover" crlf)
+  (assert (Flexi-Maternity-Eligible y)))
+
+
+;;if one of condition is not satisfied then not eligible to buy
+(defrule Check-eligible-not-satisfied
+   (or (or (or (or(or(or (is-pregnant n)
+   (stable-pregnant-week n))
+   (gender m))
+   (More-than-2-foetues y))  
+   (neq age 2))
+   (neq age 3))
+   (and (IVF-answer y)(can-accept-only-cover-baby n)))
+=>(printout t "Not eligible to buy flexi maternity cover" crlf)
+  (assert (current_goal (goal Flexi-Maternity-Cover-Enhanced) (cf 0)))
+  (assert (current_goal (goal Flexi-Maternity-Cover-Essential) (cf 0)))
+  (assert (Flexi-Maternity-Eligible n)))
+
+
+;;if eligible to buy then check higher coverage
+(defrule choose-higher-coverage
+   (Flexi-Maternity-Eligible y)
+=> (printout t "Do you want to have a higher coverage with higher budget? (y)es/(n)o" crlf)
+   (bind ?higher-coverage (read))
+   (assert (higher-coverage ?higher-coverage)))
+   
+
+;;if higher coverage then choose premium for enhanced plan 
+(defrule premium-for-enhanced-plan
+   (higher-coverage y)
+=>(assert (current_goal (goal Flexi-Maternity-Cover-Enhanced) (cf 1.0)))
+  (assert (current_goal (goal Flexi-Maternity-Cover-Essential) (cf -1.0))))
+
+
+;;if lower coverage then choose premium for essential plan
+(defrule premium-for-essential-plan
+  (higher-coverage n)
+=>(assert (current_goal (goal Flexi-Maternity-Cover-Essential) (cf 1.0)))
+  (assert (current_goal (goal Flexi-Maternity-Cover-Enhanced) (cf -1.0))))
+
+;;conclusion-Flexi-Maternity-Cover
+(defrule conclusion-Flexi-Maternity-Cover-Plan
+  (current_goal (goal Flexi-Maternity-Cover-Enhanced) (cf ?cf-Flexi-Maternity-Cover-Enhanced))
+  (current_goal (goal Flexi-Maternity-Cover-Essential) (cf ?cf-Flexi-Maternity-Cover-Essential))
+=>(printout t crlf "Flexi-Maternity-Cover-Enhanced: " ?cf-Flexi-Maternity-Cover-Enhanced "%" crlf)
+  (printout t crlf "Flexi-Maternity-Cover-Essential: " ?cf-Flexi-Maternity-Cover-Essential "%" crlf)
+  (assert (recommendation (Flexi-Maternity-Cover-Enhanced ?cf-Flexi-Maternity-Cover-Enhanced)
+                          (Flexi-Maternity-Cover-Essential ?cf-Flexi-Maternity-Cover-Essential))))
+	
+
+;;;***********************************************************
+;;;	End of Flexi Maternity Cover
+;;;***********************************************************
