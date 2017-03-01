@@ -543,7 +543,10 @@
 	(printout t crlf "Do you want to see additional benefits on top of your hospitalization plan? ((y)es/(n)o)" crlf)
 	(bind ?response (read))
 	(assert(additional-plan-ans ?response))
-	(assert (current_goal (goal Critical-Care-Advantage) (cf 0.1)))
+	(if (eq ?response y)
+        then(assert (current_goal (goal Critical-Care-Advantage) (cf 0.1)))
+        else(assert (flexi-maternity-cover start)) ;; Branching to Flexi Maternity Cover
+    )
 )
 
 ;;;***********************************************************
@@ -562,7 +565,7 @@
 )
 
 (defrule travel-frequency ""
-   (drinkhabits y)      
+   (drinkhabits ?)      
    =>
     (printout t crlf "How often do you travel in a month? (e)veryday (o)nceortwice (s)eldom (n)o" crlf)
 	(bind ?response (read))
@@ -610,6 +613,7 @@
 		then (assert (new_goal (goal Critical-Care-Advantage) (cf 0.8)))
 		else (assert (new_goal (goal Critical-Care-Advantage) (cf 0.6)))
     )
+    (assert (flexi-maternity-cover start)) ;; Branching to Flexi Maternity Cover
 )
 
 ;;; Recommendation 
@@ -957,6 +961,7 @@
 
 ;;if gender is female then ask whether is pregnant
 (defrule pregnant-qn
+    (flexi-maternity-cover start)
     (gender f)
     (or (age 2) (age 3))
 => (printout t "Are you pregnant? (y)es/(n)o" crlf)
