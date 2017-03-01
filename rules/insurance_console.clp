@@ -293,10 +293,10 @@
 					(assert (new_goal (goal Supreme-Health-B-PLUS) (cf -0.6)))
 					(assert (new_goal (goal Supreme-Health-A-PLUS) (cf -0.6)))
 					(assert (new_goal (goal Supreme-Health-P-PLUS) (cf -0.6)))
-					(assert (new_goal (goal B-PLUS-SILVER) (cf 0.6)))
-					(assert (new_goal (goal A-PLUS-GOLD) (cf 0.6)))
-					(assert (new_goal (goal P-PLUS-PLATINUM-LITE) (cf 0.6)))
-					(assert (new_goal (goal P-PLUS-PLATINUM) (cf 0.6)))					
+					(assert (current_goal (goal B-PLUS-SILVER) (cf 0.6)))
+					(assert (current_goal (goal A-PLUS-GOLD) (cf 0.6)))
+					(assert (current_goal (goal P-PLUS-PLATINUM-LITE) (cf 0.6)))
+					(assert (current_goal (goal P-PLUS-PLATINUM) (cf 0.6)))					
 		)
 		(case No then		(assert (Critical-Care-Advantage start)))
 	)
@@ -328,22 +328,22 @@
 					(assert (new_goal (goal A-PLUS-GOLD) (cf -0.6)))
 					(assert (new_goal (goal P-PLUS-PLATINUM-LITE) (cf -0.6)))
 					(assert (new_goal (goal P-PLUS-PLATINUM) (cf -0.6)))
-					(assert (new_goal (goal B-PLUS-SILVER-ESSENTIAL) (cf 0.6)))
-					(assert (new_goal (goal B-PLUS-SILVER-ADVANCE) (cf 0.6)))
-					(assert (new_goal (goal A-PLUS-GOLD-ESSENTIAL) (cf 0.6)))
-					(assert (new_goal (goal A-PLUS-GOLD-ADVANCE) (cf 0.6)))
-					(assert (new_goal (goal P-PLUS-PLATINUM-LITE-ESSENTIAL) (cf 0.6)))
-					(assert (new_goal (goal P-PLUS-PLATINUM-LITE-ADVANCE) (cf 0.6)))
-					(assert (new_goal (goal P-PLUS-PLATINUM-ESSENTIAL) (cf 0.6)))
-					(assert (new_goal (goal P-PLUS-PLATINUM-ADVANCE) (cf 0.6)))					
+					(assert (current_goal (goal B-PLUS-SILVER-ESSENTIAL) (cf 0.6)))
+					(assert (current_goal (goal B-PLUS-SILVER-ADVANCE) (cf 0.6)))
+					(assert (current_goal (goal A-PLUS-GOLD-ESSENTIAL) (cf 0.6)))
+					(assert (current_goal (goal A-PLUS-GOLD-ADVANCE) (cf 0.6)))
+					(assert (current_goal (goal P-PLUS-PLATINUM-LITE-ESSENTIAL) (cf 0.6)))
+					(assert (current_goal (goal P-PLUS-PLATINUM-LITE-ADVANCE) (cf 0.6)))
+					(assert (current_goal (goal P-PLUS-PLATINUM-ESSENTIAL) (cf 0.6)))
+					(assert (current_goal (goal P-PLUS-PLATINUM-ADVANCE) (cf 0.6)))					
 		)
-		(case No then		(assert (Critical-Care-Advantage-start start)))
+		(case No then		(assert (Critical-Care-Advantage start)))
 	)
 )
 
 ;;; Daily Hospital Income Benefit
 (defrule daily-hospital-income-benefit-qn
-	(worldwide-medical-coverage-qn Yes)
+	(worldwide-medical-coverage-ans Yes)
 	(not (daily-hospital-income-benefit-ans ?))
 =>	(printout t crlf "Do you prefer higher or lower daily hospital income benefit? (Higher/Lower)" crlf)
 	(bind ?response (read))
@@ -362,7 +362,7 @@
 
 ;;; Cancer Treatment
 (defrule cancer-treatment-qn
-	(worldwide-medical-coverage-qn Yes)
+	(worldwide-medical-coverage-ans Yes)
 	(not (cancer-treatment-ans ?))	
 =>	(printout t crlf "Do you prefer higher or lower claims for cancer treatment? (Higher/Lower)" crlf)
 	(bind ?response (read))
@@ -381,7 +381,7 @@
 
 ;;; Emergency Assistance Services
 (defrule emergency-assistance-services-qn
-	(worldwide-medical-coverage-qn Yes)
+	(worldwide-medical-coverage-ans Yes)
 	(not (emergency-assistance-services-ans ?))
 =>	(printout t crlf "Do you want emergency assistance services? (Yes/No)" crlf)
 	(bind ?response (read))
@@ -400,7 +400,7 @@
 
 ;;; Additional Annual Benefit Limit
 (defrule additional-annual-benefit-limit-qn
-	(worldwide-medical-coverage-qn Yes)
+	(worldwide-medical-coverage-ans Yes)
 	(not (additional-annual-benefit-limit-ans ?))
 =>	(printout t crlf "Do you prefer higher or lower additional annual benefit limit? (Higher/Lower)" crlf)
 	(bind ?response (read))
@@ -419,7 +419,7 @@
 
 ;;; Additional Lifetime Benefit Limit
 (defrule additional-lifetime-benefit-limit-qn
-	(worldwide-medical-coverage-qn Yes)
+	(worldwide-medical-coverage-ans Yes)
 	(not (additional-lifetime-benefit-limit-ans ?))
 =>	(printout t crlf "Do you prefer higher or lower additional lifetime benefit limit? (Higher/Lower)" crlf)
 	(bind ?response (read))
@@ -445,9 +445,9 @@
 	(bind ?response (read))
 	(assert (daily-cash-benefit-ans ?response))
 	(switch ?response
-		(case y then (assert (new_goal (goal Supreme-MediCash-Plan-A) (cf 0.6)))
-					 (assert (new_goal (goal Supreme-MediCash-Plan-B) (cf 0.6)))
-					 (assert (new_goal (goal Supreme-MediCash-Plan-C) (cf 0.6))))
+		(case y then (assert (current_goal (goal Supreme-MediCash-Plan-A) (cf 0.6)))
+					 (assert (current_goal (goal Supreme-MediCash-Plan-B) (cf 0.6)))
+					 (assert (current_goal (goal Supreme-MediCash-Plan-C) (cf 0.6))))
 		(case n then (assert (Critical-Care-Advantage start)))
 	)
 )
@@ -468,7 +468,7 @@
 
 ;;; Daily Hospital Cash Benefit - Accident
 (defrule daily-hospital-cash-benefit-accident-qn
-	(daily-cash-benefit-ans Yes)
+	(daily-cash-benefit-ans y)
 	(not (daily-hospital-cash-benefit-accident-ans ?))
 =>	(printout t crlf "How much daily hospital cash benefit (accident) do you prefer? (Low/Medium/High)" crlf)
 	(bind ?response (read))
@@ -482,7 +482,7 @@
 
 ;;; Daily Hospital Cash Benefit - ICU
 (defrule daily-hospital-cash-benefit-ICU-qn
-	(daily-cash-benefit-ans Yes)
+	(daily-cash-benefit-ans y)
 	(not (daily-hospital-cash-benefit-ICU-ans ?))
 =>	(printout t crlf "How much daily hospital cash benefit (ICU) do you prefer? (Low/Medium/High)" crlf)
 	(bind ?response (read))
@@ -496,7 +496,7 @@
 
 ;;; Recuperation Benefit - Non-Surgical Hospitalisation
 (defrule recuperation-benefit-non-surgical-hospitalisation-qn
-	(daily-cash-benefit-ans Yes)
+	(daily-cash-benefit-ans y)
 	(not (recuperation-benefit-non-surgical-hospitalisation-ans ?))
 =>	(printout t crlf "How much recuperation benefit (non-surgical hospitalisation) do you prefer? (Low/Medium/High)" crlf)
 	(bind ?response (read))
@@ -510,11 +510,11 @@
 
 ;;; Recuperation Benefit - Post Surgery
 (defrule recuperation-benefit-post-surgery-qn
-	(daily-cash-benefit-ans Yes)
+	(daily-cash-benefit-ans y)
 	(not (recuperation-benefit-post-surgery-ans ?))
 =>	(printout t crlf "How much recuperation benefit (post surgery) do you prefer? (Low/Medium/High)" crlf)
 	(bind ?response (read))
-	(assert (Critical-Care-Advantage-start start))													;;; NOTE!!!
+	(assert (Critical-Care-Advantage start))
 	(assert (recuperation-benefit-non-surgical-hospitalisation-ans ?response))
 	(switch ?response
 		(case Low then		(assert (new_goal (goal Supreme-MediCash-Plan-A) (cf 0.5))))
@@ -681,32 +681,10 @@
 )
 
 ;;;***************************************************************
-;;;	Supreme Health Policy Only Recommendation Category
+;;;	Supreme Health Policy (Basic)
 ;;;***************************************************************
 
-(defrule compile_supremehealth_only_recommendations
-	(current_goal (goal Supreme-Health-Standard-Plan) (cf ?cf-Supreme-Health-Standard-Plan))
-	(current_goal (goal Supreme-Health-B-PLUS) (cf ?cf-Supreme-Health-B-PLUS))
-	(current_goal (goal Supreme-Health-A-PLUS) (cf ?cf-Supreme-Health-A-PLUS))
-	(current_goal (goal Supreme-Health-P-PLUS) (cf ?cf-Supreme-Health-P-PLUS))
-=>	(assert (recommendation
-		(Supreme-Health-Standard-Plan ?cf-Supreme-Health-Standard-Plan)
-		(Supreme-Health-B-PLUS ?cf-Supreme-Health-B-PLUS)
-		(Supreme-Health-A-PLUS ?cf-Supreme-Health-A-PLUS)
-		(Supreme-Health-P-PLUS ?cf-Supreme-Health-P-PLUS)
-	))
-	(printout t crlf "Recommendation:")
-	(printout t crlf "Supreme-Health-Standard-Plan: " ?cf-Supreme-Health-Standard-Plan)
-	(printout t crlf "Supreme-Health-B-PLUS: " ?cf-Supreme-Health-B-PLUS)
-	(printout t crlf "Supreme-Health-A-PLUS: " ?cf-Supreme-Health-A-PLUS)
-	(printout t crlf "Supreme-Health-P-PLUS: " ?cf-Supreme-Health-P-PLUS)
-)
-
-;;;***************************************************************
-;;;	Supreme Health Policy + Critical Care Recommendation Category
-;;;***************************************************************
-
-(defrule compile_supremehealth_criticalcare_recommendations
+(defrule compile_supremehealth_basic_recommendations
 	(current_goal (goal Supreme-Health-Standard-Plan) (cf ?cf-Supreme-Health-Standard-Plan))
 	(current_goal (goal Supreme-Health-B-PLUS) (cf ?cf-Supreme-Health-B-PLUS))
 	(current_goal (goal Supreme-Health-A-PLUS) (cf ?cf-Supreme-Health-A-PLUS))
@@ -719,12 +697,93 @@
 		(Supreme-Health-P-PLUS ?cf-Supreme-Health-P-PLUS)
 		(Critical-Care-Advantage ?cf-Critical-Care-Advantage)
 	))
-	(printout t crlf "Recommendation:")
+	(printout t crlf "We recommend you below GE basic health insurance package:")
 	(printout t crlf "Supreme-Health-Standard-Plan: " ?cf-Supreme-Health-Standard-Plan)	
 	(printout t crlf "Supreme-Health-B-PLUS: " ?cf-Supreme-Health-B-PLUS)
 	(printout t crlf "Supreme-Health-A-PLUS: " ?cf-Supreme-Health-A-PLUS)
 	(printout t crlf "Supreme-Health-P-PLUS: " ?cf-Supreme-Health-P-PLUS)
 	(printout t crlf "Critical-Care-Advantage: " ?cf-Critical-Care-Advantage crlf)	
+)
+
+;;;***************************************************************
+;;;	Supreme Health Policy (Total Health)
+;;;***************************************************************
+
+(defrule compile_supremehealth_totalhealth_recommendations
+	(current_goal (goal B-PLUS-SILVER) (cf ?cf-B-PLUS-SILVER))
+	(current_goal (goal A-PLUS-GOLD) (cf ?cf-A-PLUS-GOLD))
+	(current_goal (goal P-PLUS-PLATINUM-LITE) (cf ?cf-P-PLUS-PLATINUM-LITE))
+	(current_goal (goal P-PLUS-PLATINUM) (cf ?cf-P-PLUS-PLATINUM))	
+	(current_goal (goal Critical-Care-Advantage) (cf ?cf-Critical-Care-Advantage))
+=>	(assert (recommendation
+		(B-PLUS-SILVER ?cf-B-PLUS-SILVER)
+		(A-PLUS-GOLD ?cf-A-PLUS-GOLD)
+		(P-PLUS-PLATINUM-LITE ?cf-P-PLUS-PLATINUM-LITE)
+		(P-PLUS-PLATINUM ?cf-P-PLUS-PLATINUM)
+		(Critical-Care-Advantage ?cf-Critical-Care-Advantage)
+	))
+	(printout t crlf "We recommend you below GE total health insurance package:")
+	(printout t crlf "Supreme-Health-B-PLUS-Total-Health-SILVER: " ?cf-B-PLUS-SILVER)
+	(printout t crlf "Supreme-Health-A-PLUS-Total-Health-GOLD: " ?cf-A-PLUS-GOLD)
+	(printout t crlf "Supreme-Health-P-PLUS-Total-Health-PLATINUM-LITE: " ?cf-P-PLUS-PLATINUM-LITE)
+	(printout t crlf "Supreme-Health-P-PLUS-Total-Health-PLATINUM: " ?cf-P-PLUS-PLATINUM)	
+	(printout t crlf "Critical-Care-Advantage: " ?cf-Critical-Care-Advantage crlf)	
+)
+
+;;;***************************************************************
+;;;	Supreme Health Policy (Total Health PLUS)
+;;;***************************************************************
+
+(defrule compile_supremehealth_totalhealthplus_recommendations
+	(current_goal (goal B-PLUS-SILVER-ESSENTIAL) (cf ?cf-B-PLUS-SILVER-ESSENTIAL))
+	(current_goal (goal B-PLUS-SILVER-ADVANCE) (cf ?cf-B-PLUS-SILVER-ADVANCE))
+	(current_goal (goal A-PLUS-GOLD-ESSENTIAL) (cf ?cf-A-PLUS-GOLD-ESSENTIAL))
+	(current_goal (goal A-PLUS-GOLD-ADVANCE) (cf ?cf-A-PLUS-GOLD-ADVANCE))
+	(current_goal (goal P-PLUS-PLATINUM-LITE-ESSENTIAL) (cf ?cf-P-PLUS-PLATINUM-LITE-ESSENTIAL))
+	(current_goal (goal P-PLUS-PLATINUM-LITE-ADVANCE) (cf ?cf-P-PLUS-PLATINUM-LITE-ADVANCE))
+	(current_goal (goal P-PLUS-PLATINUM-ESSENTIAL) (cf ?cf-P-PLUS-PLATINUM-ESSENTIAL))
+	(current_goal (goal P-PLUS-PLATINUM-ADVANCE) (cf ?cf-P-PLUS-PLATINUM-ADVANCE))
+	(current_goal (goal Critical-Care-Advantage) (cf ?cf-Critical-Care-Advantage))
+=>	(assert (recommendation
+		(B-PLUS-SILVER-ESSENTIAL ?cf-B-PLUS-SILVER-ESSENTIAL)
+		(B-PLUS-SILVER-ADVANCE ?cf-B-PLUS-SILVER-ADVANCE)
+		(A-PLUS-GOLD-ESSENTIAL ?cf-A-PLUS-GOLD-ESSENTIAL)
+		(A-PLUS-GOLD-ADVANCE ?cf-A-PLUS-GOLD-ADVANCE)
+		(P-PLUS-PLATINUM-LITE-ESSENTIAL ?cf-P-PLUS-PLATINUM-LITE-ESSENTIAL)
+		(P-PLUS-PLATINUM-LITE-ADVANCE ?cf-P-PLUS-PLATINUM-LITE-ADVANCE)
+		(P-PLUS-PLATINUM-ESSENTIAL ?cf-P-PLUS-PLATINUM-ESSENTIAL)
+		(P-PLUS-PLATINUM-ADVANCE ?cf-P-PLUS-PLATINUM-ADVANCE)
+		(Critical-Care-Advantage ?cf-Critical-Care-Advantage)
+	))
+	(printout t crlf "We recommend you below GE total health PLUS insurance package:")
+	(printout t crlf "Supreme-Health-B-PLUS-Total-Health-SILVER-Total-Health-Plus-ESSENTIAL: " ?cf-B-PLUS-SILVER-ESSENTIAL)
+	(printout t crlf "Supreme-Health-B-PLUS-Total-Health-SILVER-Total-Health-Plus-ADVANCE: " ?cf-B-PLUS-SILVER-ADVANCE)
+	(printout t crlf "Supreme-Health-A-PLUS-Total-Health-GOLD-Total-Health-Plus-ESSENTIAL: " ?cf-A-PLUS-GOLD-ESSENTIAL)
+	(printout t crlf "Supreme-Health-A-PLUS-Total-Health-GOLD-Total-Health-Plus-ADVANCE: " ?cf-A-PLUS-GOLD-ADVANCE)
+	(printout t crlf "Supreme-Health-P-PLUS-Total-Health-PLATINUM-LITE-Total-Health-Plus-ESSENTIAL: " ?cf-P-PLUS-PLATINUM-LITE-ESSENTIAL)
+	(printout t crlf "Supreme-Health-P-PLUS-Total-Health-PLATINUM-LITE-Total-Health-Plus-ADVANCE: " ?cf-P-PLUS-PLATINUM-LITE-ADVANCE)
+	(printout t crlf "Supreme-Health-P-PLUS-Total-Health-PLATINUM-Total-Health-Plus-ESSENTIAL: " ?cf-P-PLUS-PLATINUM-ESSENTIAL)
+	(printout t crlf "Supreme-Health-P-PLUS-Total-Health-PLATINUM-Total-Health-Plus-ADVANCE: " ?cf-P-PLUS-PLATINUM-ADVANCE)
+	(printout t crlf "Critical-Care-Advantage: " ?cf-Critical-Care-Advantage crlf)	
+)
+
+;;;***************************************************************
+;;;	Supreme Health Policy (Cash)
+;;;***************************************************************
+
+(defrule compile_supremehealth_cash_recommendations
+	(current_goal (goal Supreme-MediCash-Plan-A) (cf ?cf-Supreme-MediCash-Plan-A))
+	(current_goal (goal Supreme-MediCash-Plan-B) (cf ?cf-Supreme-MediCash-Plan-B))
+	(current_goal (goal Supreme-MediCash-Plan-C) (cf ?cf-Supreme-MediCash-Plan-C))
+=>	(assert (recommendation
+		(Supreme-MediCash-Plan-A ?cf-Supreme-MediCash-Plan-A)
+		(Supreme-MediCash-Plan-B ?cf-Supreme-MediCash-Plan-B)
+		(Supreme-MediCash-Plan-C ?cf-Supreme-MediCash-Plan-C)		
+	))
+	(printout t crlf "We recommend you below GE cash benefit add-on to your health insurance package:")
+	(printout t crlf "Supreme-MediCash-Plan-A: " ?cf-Supreme-MediCash-Plan-A)
+	(printout t crlf "Supreme-MediCash-Plan-B: " ?cf-Supreme-MediCash-Plan-B)
+	(printout t crlf "Supreme-MediCash-Plan-C: " ?cf-Supreme-MediCash-Plan-C crlf)
 )
 
 ;;;***********************************************************
