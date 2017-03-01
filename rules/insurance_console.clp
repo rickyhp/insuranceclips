@@ -713,7 +713,21 @@
 	(bind ?response (read))
 	(assert(parent-medical-condition ?response))
 	(if(eq ?response y)
+		then (assert (new_goal (goal Critical-Care-Advantage) (cf (* ?cf-Critical-Care-Advantage 0.7))))
+    )
+)
+
+(defrule high-stress-job ""
+   (parent-medical-condition ?)
+   (not (high-stress-job ?))
+   (current_fact (fact Critical-Care-Advantage) (cf ?cf-Critical-Care-Advantage))
+   =>
+    (printout t crlf "How do you scale your current job stress level? (1-10)" crlf)
+	(bind ?response (read))
+	(assert(high-stress-job ?response))
+	(if(>= ?response 5)
 		then (assert (new_goal (goal Critical-Care-Advantage) (cf (* ?cf-Critical-Care-Advantage 0.8))))
+		else (assert (new_goal (goal Critical-Care-Advantage) (cf (* ?cf-Critical-Care-Advantage 0.6))))
     )
 )
 
