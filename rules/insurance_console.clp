@@ -158,6 +158,15 @@
 	(assert (regular-exercise ?response))
 )
 
+;; Employment
+(defrule determine-employment
+    (regular-exercise ?)
+    (not (employment-status ?))
+   =>   
+    (printout t crlf "What is your employment status? (f)ull-time/(p)art-time" crlf)
+	(bind ?response (read))
+	(assert (employment-status ?response))
+)
 
 ;;; Do you prefer a standard hospitalisation plan or a comprehensive hospitalisation plan?
 (defrule standard-vs-comprehensive-qn
