@@ -35,57 +35,7 @@
 	(slot ElderShield_Comprehensive-2ADL)
 	)
 
-(deffacts load-facts
-	(current_fact (fact Supreme-Health-Standard-Plan) (cf 0.5))
-	(current_fact (fact Supreme-Health-B-PLUS) (cf 0.5))
-	(current_fact (fact Supreme-Health-A-PLUS) (cf 0.5))
-	(current_fact (fact Supreme-Health-P-PLUS) (cf 0.5))
-	(current_fact (fact B-PLUS-SILVER) (cf 0.5))
-	(current_fact (fact A-PLUS-GOLD) (cf 0.5))
-	(current_fact (fact P-PLUS-PLATINUM-LITE) (cf 0.5))
-	(current_fact (fact P-PLUS-PLATINUM) (cf 0.5))
-	(current_fact (fact B-PLUS-SILVER-ESSENTIAL) (cf 0.5))
-	(current_fact (fact B-PLUS-SILVER-ADVANCE) (cf 0.5))
-	(current_fact (fact A-PLUS-GOLD-ESSENTIAL) (cf 0.5))
-	(current_fact (fact A-PLUS-GOLD-ADVANCE) (cf 0.5))
-	(current_fact (fact P-PLUS-PLATINUM-LITE-ESSENTIAL) (cf 0.5))
-	(current_fact (fact P-PLUS-PLATINUM-LITE-ADVANCE) (cf 0.5))
-	(current_fact (fact P-PLUS-PLATINUM-ESSENTIAL) (cf 0.5))
-	(current_fact (fact P-PLUS-PLATINUM-ADVANCE) (cf 0.5))
-	(current_fact (fact Supreme-MediCash-Plan-A) (cf 0.5))
-	(current_fact (fact Supreme-MediCash-Plan-B) (cf 0.5))
-	(current_fact (fact Supreme-MediCash-Plan-C) (cf 0.5))
-	(current_fact (fact Critical-Care-Advantage) (cf 0.5))
-;	(current_fact (fact ADL) (cf 0.0))
-;	(current_fact (fact payout_>6years) (cf 0.0))
-;	(current_fact (fact payout_amount_>400) (cf 0.0))	
-	
-	(current_goal (goal Supreme-Health-Standard-Plan) (cf 0.5))
-	(current_goal (goal Supreme-Health-B-PLUS) (cf 0.5))
-	(current_goal (goal Supreme-Health-A-PLUS) (cf 0.5))
-	(current_goal (goal Supreme-Health-P-PLUS) (cf 0.5))
-	(current_goal (goal B-PLUS-SILVER) (cf 0.5))
-	(current_goal (goal A-PLUS-GOLD) (cf 0.5))
-	(current_goal (goal P-PLUS-PLATINUM-LITE) (cf 0.5))
-	(current_goal (goal P-PLUS-PLATINUM) (cf 0.5))
-	(current_goal (goal B-PLUS-SILVER-ESSENTIAL) (cf 0.5))
-	(current_goal (goal B-PLUS-SILVER-ADVANCE) (cf 0.5))
-	(current_goal (goal A-PLUS-GOLD-ESSENTIAL) (cf 0.5))
-	(current_goal (goal A-PLUS-GOLD-ADVANCE) (cf 0.5))
-	(current_goal (goal P-PLUS-PLATINUM-LITE-ESSENTIAL) (cf 0.5))
-	(current_goal (goal P-PLUS-PLATINUM-LITE-ADVANCE) (cf 0.5))
-	(current_goal (goal P-PLUS-PLATINUM-ESSENTIAL) (cf 0.5))
-	(current_goal (goal P-PLUS-PLATINUM-ADVANCE) (cf 0.5))
-	(current_goal (goal Supreme-MediCash-Plan-A) (cf 0.5))
-	(current_goal (goal Supreme-MediCash-Plan-B) (cf 0.5))
-	(current_goal (goal Supreme-MediCash-Plan-C) (cf 0.5))	
-	(current_goal (goal Critical-Care-Advantage) (cf 0.5))
-;	(current_goal (goal Basic_ElderShield) (cf 0.5))
-;	(current_goal (goal ElderShield_Comprehensive-3ADL) (cf 0.5))
-;	(current_goal (goal ElderShield_Comprehensive-2ADL) (cf 0.5))
-)
-
-(defrule initialise-current-goal
+(defrule initialise-current-goal	
 	(new_goal (goal ?ng) (cf ?cfng))
 	(not (current_goal (goal ?cg) (cf ?cfg)))
 	?newg <- (new_goal (goal ?ng) (cf ?cfng))
@@ -211,10 +161,6 @@
 
 ;;; Do you prefer a standard hospitalisation plan or a comprehensive hospitalisation plan?
 (defrule standard-vs-comprehensive-qn
-	(current_fact (fact Supreme-Health-Standard-Plan) (cf ?cf-Supreme-Health-Standard-Plan))
-	(current_fact (fact Supreme-Health-B-PLUS) (cf ?cf-Supreme-Health-B-PLUS))
-	(current_fact (fact Supreme-Health-A-PLUS) (cf ?cf-Supreme-Health-A-PLUS))
-	(current_fact (fact Supreme-Health-P-PLUS) (cf ?cf-Supreme-Health-P-PLUS))
 	(marital-status ?)
 	(not (standard-vs-comprehensive-ans ?))
 =>	(printout t crlf "Do you prefer a standard hospitalisation plan or a comprehensive hospitalisation plan? ((s)tandard/(c)omprehensive)" crlf)
@@ -222,11 +168,11 @@
 	(switch ?response
 		(case s then	(assert (Supreme-MediCash-start start))
 						(assert (standard-vs-comprehensive-ans Standard))
-						(assert (new_goal (goal Supreme-Health-Standard-Plan) (cf (* ?cf-Supreme-Health-Standard-Plan 0.6)))))
+						(assert (new_goal (goal Supreme-Health-Standard-Plan) (cf 0.6))))
 		(case c then	(assert (standard-vs-comprehensive-ans Comprehensive))
-						(assert (new_goal (goal Supreme-Health-B-PLUS) (cf (* ?cf-Supreme-Health-B-PLUS 0.6))))
-						(assert (new_goal (goal Supreme-Health-A-PLUS) (cf (* ?cf-Supreme-Health-A-PLUS 0.6))))
-						(assert (new_goal (goal Supreme-Health-P-PLUS) (cf (* ?cf-Supreme-Health-P-PLUS 0.6))))
+						(assert (new_goal (goal Supreme-Health-B-PLUS) (cf 0.6)))
+						(assert (new_goal (goal Supreme-Health-A-PLUS) (cf 0.6)))
+						(assert (new_goal (goal Supreme-Health-P-PLUS) (cf 0.6)))
 		)
 	)
 )
@@ -234,136 +180,120 @@
 ;;; Hospital/Ward Class Entitlement
 (defrule hospital-ward-class-qn
 	(standard-vs-comprehensive-ans Comprehensive)
-	(current_fact (fact Supreme-Health-B-PLUS) (cf ?cf-Supreme-Health-B-PLUS))
-	(current_fact (fact Supreme-Health-A-PLUS) (cf ?cf-Supreme-Health-A-PLUS))
-	(current_fact (fact Supreme-Health-P-PLUS) (cf ?cf-Supreme-Health-P-PLUS))
+	(not (hospital-ward-class-ans ?))	
 =>	(printout t crlf "Do you prefer (1) Restructured Hospitals, Class B1 Wards, (2) Restructured Hospitals, Class A Wards, or (3) Private Hospitals? (1/2/3)" crlf)
 	(bind ?response (read))
+	(assert (hospital-ward-class-ans ?response))
 	(switch ?response
-		(case 1 then	(assert (new_goal (goal Supreme-Health-B-PLUS) (cf (* ?cf-Supreme-Health-B-PLUS 0.9)))))
-		(case 2 then	(assert (new_goal (goal Supreme-Health-A-PLUS) (cf (* ?cf-Supreme-Health-A-PLUS 0.9)))))
-		(case 3 then	(assert (new_goal (goal Supreme-Health-P-PLUS) (cf (* ?cf-Supreme-Health-P-PLUS 0.9)))))
+		(case 1 then	(assert (new_goal (goal Supreme-Health-B-PLUS) (cf 0.9))))
+		(case 2 then	(assert (new_goal (goal Supreme-Health-A-PLUS) (cf 0.9))))
+		(case 3 then	(assert (new_goal (goal Supreme-Health-P-PLUS) (cf 0.9))))
 	)
 )
 
 ;;; Confinement in Community Hospital
 (defrule confinement-in-community-hospital-qn
-	(standard-vs-comprehensive-ans Comprehensive)
-	(current_fact (fact Supreme-Health-B-PLUS) (cf ?cf-Supreme-Health-B-PLUS))
-	(current_fact (fact Supreme-Health-A-PLUS) (cf ?cf-Supreme-Health-A-PLUS))
-	(current_fact (fact Supreme-Health-P-PLUS) (cf ?cf-Supreme-Health-P-PLUS))
+	(standard-vs-comprehensive-ans Comprehensive)		
+	(not (confinement-in-community-hospital-ans ?))
 =>	(printout t crlf "How much S$ do you prefer in the event of confinement in community hospital? (Low/Medium/High)" crlf)
 	(bind ?response (read))
+	(assert (confinement-in-community-hospital-ans ?response))
 	(switch ?response
-		(case Low then		(assert (new_goal (goal Supreme-Health-B-PLUS) (cf (* ?cf-Supreme-Health-B-PLUS 0.4)))))
-		(case Medium then	(assert (new_goal (goal Supreme-Health-A-PLUS) (cf (* ?cf-Supreme-Health-A-PLUS 0.4)))))
-		(case High then		(assert (new_goal (goal Supreme-Health-P-PLUS) (cf (* ?cf-Supreme-Health-P-PLUS 0.4)))))
+		(case Low then		(assert (new_goal (goal Supreme-Health-B-PLUS) (cf 0.4))))
+		(case Medium then	(assert (new_goal (goal Supreme-Health-A-PLUS) (cf 0.4))))
+		(case High then		(assert (new_goal (goal Supreme-Health-P-PLUS) (cf 0.4))))
 	)
 )
 
 ;;; Congenital Abnormalities
 (defrule congenital-abnormalities-qn
-	(standard-vs-comprehensive-ans Comprehensive)
-	(current_fact (fact Supreme-Health-B-PLUS) (cf ?cf-Supreme-Health-B-PLUS))
-	(current_fact (fact Supreme-Health-A-PLUS) (cf ?cf-Supreme-Health-A-PLUS))
-	(current_fact (fact Supreme-Health-P-PLUS) (cf ?cf-Supreme-Health-P-PLUS))
+	(standard-vs-comprehensive-ans Comprehensive)	
+	(not (congenital-abnormalities-ans ?))
 =>	(printout t crlf "How much S$ do you prefer in the event of diagnose with congenital abnormalities? (Low/Medium/High)" crlf)
 	(bind ?response (read))
+	(assert (congenital-abnormalities-ans ?response))
 	(switch ?response
-		(case Low then		(assert (new_goal (goal Supreme-Health-B-PLUS) (cf (* ?cf-Supreme-Health-B-PLUS 0.4)))))
-		(case Medium then	(assert (new_goal (goal Supreme-Health-A-PLUS) (cf (* ?cf-Supreme-Health-A-PLUS 0.4)))))
-		(case High then		(assert (new_goal (goal Supreme-Health-P-PLUS) (cf (* ?cf-Supreme-Health-P-PLUS 0.4)))))
+		(case Low then		(assert (new_goal (goal Supreme-Health-B-PLUS) (cf 0.4))))
+		(case Medium then	(assert (new_goal (goal Supreme-Health-A-PLUS) (cf 0.4))))
+		(case High then		(assert (new_goal (goal Supreme-Health-P-PLUS) (cf 0.4))))
 	)
 )
 
 ;;; Living Organ Donor Transplant
 (defrule living-organ-donor-transplant-qn
 	(standard-vs-comprehensive-ans Comprehensive)
-	(current_fact (fact Supreme-Health-B-PLUS) (cf ?cf-Supreme-Health-B-PLUS))
-	(current_fact (fact Supreme-Health-A-PLUS) (cf ?cf-Supreme-Health-A-PLUS))
-	(current_fact (fact Supreme-Health-P-PLUS) (cf ?cf-Supreme-Health-P-PLUS))
+	(not (living-organ-donor-transplant-ans ?))
 =>	(printout t crlf "How much S$ do you prefer per living organ donor transplant? (Low/Medium/High)" crlf)
 	(bind ?response (read))
+	(assert (living-organ-donor-transplant-ans ?response))
 	(switch ?response
-		(case Low then		(assert (new_goal (goal Supreme-Health-B-PLUS) (cf (* ?cf-Supreme-Health-B-PLUS 0.4)))))
-		(case Medium then	(assert (new_goal (goal Supreme-Health-A-PLUS) (cf (* ?cf-Supreme-Health-A-PLUS 0.4)))))
-		(case High then		(assert (new_goal (goal Supreme-Health-P-PLUS) (cf (* ?cf-Supreme-Health-P-PLUS 0.4)))))
+		(case Low then		(assert (new_goal (goal Supreme-Health-B-PLUS) (cf 0.4))))
+		(case Medium then	(assert (new_goal (goal Supreme-Health-A-PLUS) (cf 0.4))))
+		(case High then		(assert (new_goal (goal Supreme-Health-P-PLUS) (cf 0.4))))
 	)
 )
 
 ;;; Psychiatric Treatment
 (defrule psychiatric-treatment-qn
 	(standard-vs-comprehensive-ans Comprehensive)
-	(current_fact (fact Supreme-Health-B-PLUS) (cf ?cf-Supreme-Health-B-PLUS))
-	(current_fact (fact Supreme-Health-A-PLUS) (cf ?cf-Supreme-Health-A-PLUS))
-	(current_fact (fact Supreme-Health-P-PLUS) (cf ?cf-Supreme-Health-P-PLUS))
+	(not (psychiatric-treatment-ans ?))
 =>	(printout t crlf "How much S$ do you prefer in the event of psychiatric treatment? (Low/Medium/High)" crlf)
 	(bind ?response (read))
+	(assert (psychiatric-treatment-ans ?response))
 	(switch ?response
-		(case Low then		(assert (new_goal (goal Supreme-Health-B-PLUS) (cf (* ?cf-Supreme-Health-B-PLUS 0.4)))))
-		(case Medium then	(assert (new_goal (goal Supreme-Health-A-PLUS) (cf (* ?cf-Supreme-Health-A-PLUS 0.4)))))
-		(case High then		(assert (new_goal (goal Supreme-Health-P-PLUS) (cf (* ?cf-Supreme-Health-P-PLUS 0.4)))))
+		(case Low then		(assert (new_goal (goal Supreme-Health-B-PLUS) (cf 0.4))))
+		(case Medium then	(assert (new_goal (goal Supreme-Health-A-PLUS) (cf 0.4))))
+		(case High then		(assert (new_goal (goal Supreme-Health-P-PLUS) (cf 0.4))))
 	)
 )
 
 ;;; Final Expenses Benefit
 (defrule final-expenses-benefit-qn
 	(standard-vs-comprehensive-ans Comprehensive)
-	(current_fact (fact Supreme-Health-B-PLUS) (cf ?cf-Supreme-Health-B-PLUS))
-	(current_fact (fact Supreme-Health-A-PLUS) (cf ?cf-Supreme-Health-A-PLUS))
-	(current_fact (fact Supreme-Health-P-PLUS) (cf ?cf-Supreme-Health-P-PLUS))
+	(not (final-expenses-benefit-ans ?))
 =>	(printout t crlf "How much final expenses benefit do you prefer? (Low/Medium/High)" crlf)
 	(bind ?response (read))
+	(assert (final-expenses-benefit-ans ?response))
 	(switch ?response
-		(case Low then		(assert (new_goal (goal Supreme-Health-B-PLUS) (cf (* ?cf-Supreme-Health-B-PLUS 0.4)))))
-		(case Medium then	(assert (new_goal (goal Supreme-Health-A-PLUS) (cf (* ?cf-Supreme-Health-A-PLUS 0.4)))))
-		(case High then		(assert (new_goal (goal Supreme-Health-P-PLUS) (cf (* ?cf-Supreme-Health-P-PLUS 0.4)))))
+		(case Low then		(assert (new_goal (goal Supreme-Health-B-PLUS) (cf 0.4))))
+		(case Medium then	(assert (new_goal (goal Supreme-Health-A-PLUS) (cf 0.4))))
+		(case High then		(assert (new_goal (goal Supreme-Health-P-PLUS) (cf 0.4))))
 	)
 )
 
 ;;; Annual Benefit Limit
 (defrule annual-benefit-limit-qn
 	(standard-vs-comprehensive-ans Comprehensive)
-	(current_fact (fact Supreme-Health-B-PLUS) (cf ?cf-Supreme-Health-B-PLUS))
-	(current_fact (fact Supreme-Health-A-PLUS) (cf ?cf-Supreme-Health-A-PLUS))
-	(current_fact (fact Supreme-Health-P-PLUS) (cf ?cf-Supreme-Health-P-PLUS))
+	(not (annual-benefit-limit-ans ?))
 =>	(printout t crlf "How much annual benefit limit do you prefer? (Low/Medium/High)" crlf)
 	(bind ?response (read))
 	(assert (Total-Health-start start))
+	(assert (annual-benefit-limit-ans ?response))
 	(switch ?response
-		(case Low then		(assert (new_goal (goal Supreme-Health-B-PLUS) (cf (* ?cf-Supreme-Health-B-PLUS 0.4)))))
-		(case Medium then	(assert (new_goal (goal Supreme-Health-A-PLUS) (cf (* ?cf-Supreme-Health-A-PLUS 0.4)))))
-		(case High then		(assert (new_goal (goal Supreme-Health-P-PLUS) (cf (* ?cf-Supreme-Health-P-PLUS 0.4)))))
+		(case Low then		(assert (new_goal (goal Supreme-Health-B-PLUS) (cf 0.4))))
+		(case Medium then	(assert (new_goal (goal Supreme-Health-A-PLUS) (cf 0.4))))
+		(case High then		(assert (new_goal (goal Supreme-Health-P-PLUS) (cf 0.4))))
 	)
 )
 
 ;;; Do you want a complete coverage?
 (defrule complete-coverage-qn
 	(Total-Health-start start)
-	(current_fact (fact Supreme-Health-B-PLUS) (cf ?cf-Supreme-Health-B-PLUS))
-	(current_fact (fact Supreme-Health-A-PLUS) (cf ?cf-Supreme-Health-A-PLUS))
-	(current_fact (fact Supreme-Health-P-PLUS) (cf ?cf-Supreme-Health-P-PLUS))
-	(current_fact (fact B-PLUS-SILVER) (cf ?cf-B-PLUS-SILVER))
-	(current_fact (fact A-PLUS-GOLD) (cf ?cf-A-PLUS-GOLD))
-	(current_fact (fact P-PLUS-PLATINUM-LITE) (cf ?cf-P-PLUS-PLATINUM-LITE))
-	(current_fact (fact P-PLUS-PLATINUM) (cf ?cf-P-PLUS-PLATINUM))
+	(not (complete-coverage-ans ?))
 =>	(printout t crlf "Do you want a complete coverage (i.e. including deductible, co-insurance, comprehensive benefits etc.)? (Yes/No)" crlf)
 	(bind ?response (read))
+	(assert (complete-coverage-ans ?response))
 	(switch ?response
 		(case Yes then		(assert (complete-coverage-ans ?response))
-					(assert (new_goal (goal Supreme-Health-B-PLUS) (cf (* ?cf-Supreme-Health-B-PLUS -0.6))))
-					(assert (new_goal (goal Supreme-Health-A-PLUS) (cf (* ?cf-Supreme-Health-A-PLUS -0.6))))
-					(assert (new_goal (goal Supreme-Health-P-PLUS) (cf (* ?cf-Supreme-Health-P-PLUS -0.6))))
-					(assert (new_goal (goal B-PLUS-SILVER) (cf (* ?cf-Supreme-Health-B-PLUS 0.6))))
-					(assert (new_goal (goal A-PLUS-GOLD) (cf (* ?cf-A-PLUS-GOLD 0.6))))
-					(assert (new_goal (goal P-PLUS-PLATINUM-LITE) (cf (* ?cf-P-PLUS-PLATINUM-LITE 0.6))))
-					(assert (new_goal (goal P-PLUS-PLATINUM) (cf (* ?cf-P-PLUS-PLATINUM 0.6))))
-					(assert (new_goal (goal B-PLUS-SILVER) (cf ?cf-Supreme-Health-B-PLUS)))						;;; ERROR!!!
-					(assert (new_goal (goal A-PLUS-GOLD) (cf ?cf-Supreme-Health-A-PLUS)))						;;; ERROR!!!
-					(assert (new_goal (goal P-PLUS-PLATINUM-LITE) (cf ?cf-Supreme-Health-P-PLUS)))					;;; ERROR!!!
-					(assert (new_goal (goal P-PLUS-PLATINUM) (cf ?cf-Supreme-Health-P-PLUS)))					;;; ERROR!!!
+					(assert (new_goal (goal Supreme-Health-B-PLUS) (cf -0.6)))
+					(assert (new_goal (goal Supreme-Health-A-PLUS) (cf -0.6)))
+					(assert (new_goal (goal Supreme-Health-P-PLUS) (cf -0.6)))
+					(assert (new_goal (goal B-PLUS-SILVER) (cf 0.6)))
+					(assert (new_goal (goal A-PLUS-GOLD) (cf 0.6)))
+					(assert (new_goal (goal P-PLUS-PLATINUM-LITE) (cf 0.6)))
+					(assert (new_goal (goal P-PLUS-PLATINUM) (cf 0.6)))					
 		)
-		(case No then		(assert (Critical-Care-Advantage start)))									;;; NOTE!!!
+		(case No then		(assert (Critical-Care-Advantage start)))
 	)
 )
 
@@ -553,16 +483,14 @@
 ;;; Do you want daily cash benefit for each day spend in hospital?
 (defrule daily-cash-benefit-qn
 	(Supreme-MediCash-start start)
-	(current_fact (fact Supreme-MediCash-Plan-A) (cf ?cf-Supreme-MediCash-Plan-A))
-	(current_fact (fact Supreme-MediCash-Plan-B) (cf ?cf-Supreme-MediCash-Plan-B))
-	(current_fact (fact Supreme-MediCash-Plan-C) (cf ?cf-Supreme-MediCash-Plan-C))
+	(not (daily-cash-benefit-ans ?))
 =>	(printout t crlf "Do you want daily cash benefit for each day spend in hospital? ((y)es/(n)o)" crlf)
 	(bind ?response (read))
+	(assert (daily-cash-benefit-ans ?response))
 	(switch ?response
-		(case y then (assert (daily-cash-benefit-ans ?response))
-					(assert (new_goal (goal Supreme-MediCash-Plan-A) (cf (* ?cf-Supreme-MediCash-Plan-A 0.6))))
-					(assert (new_goal (goal Supreme-MediCash-Plan-B) (cf (* ?cf-Supreme-MediCash-Plan-B 0.6))))
-					(assert (new_goal (goal Supreme-MediCash-Plan-C) (cf (* ?cf-Supreme-MediCash-Plan-C 0.6)))))
+		(case y then (assert (new_goal (goal Supreme-MediCash-Plan-A) (cf 0.6)))
+					 (assert (new_goal (goal Supreme-MediCash-Plan-B) (cf 0.6)))
+					 (assert (new_goal (goal Supreme-MediCash-Plan-C) (cf 0.6))))
 		(case n then (assert (Critical-Care-Advantage start)))
 	)
 )
@@ -648,16 +576,11 @@
 (defrule additional-plan-qn
    (Critical-Care-Advantage start)
    (not (additional-plan-ans ?))
-   (current_fact (fact Critical-Care-Advantage) (cf ?cf-Critical-Care-Advantage))
 =>	
 	(printout t crlf "Do you want to see additional benefits on top of your hospitalization plan? ((y)es/(n)o)" crlf)
 	(bind ?response (read))
 	(assert(additional-plan-ans ?response))
-	(if (eq ?response y)
-		then (			
-			assert(new_goal (goal Critical-Care-Advantage) (cf (* ?cf-Critical-Care-Advantage 0.5)))
-		)
-	)
+	(assert (current_goal (goal Critical-Care-Advantage) (cf 0.1)))
 )
 
 ;;;***********************************************************
@@ -665,69 +588,64 @@
 ;;;***********************************************************
 (defrule drinking-habits ""
    (additional-plan-ans y)
-   (not (drinkhabits ?))
-   (current_fact (fact Critical-Care-Advantage) (cf ?cf-Critical-Care-Advantage))
+   (not (drinkhabits ?))   
    =>
     (printout t crlf "Are you drinking regularly? (y)es/(n)o" crlf)
 	(bind ?response (read))
 	(assert(drinkhabits ?response))
 	(if(eq ?response y)
-		then (assert (new_goal (goal Critical-Care-Advantage) (cf (* ?cf-Critical-Care-Advantage 0.7))))
+		then (assert (new_goal (goal Critical-Care-Advantage) (cf 0.7)))
 	)
 )
 
 (defrule travel-frequency ""
-   (drinkhabits y)   
-   (current_fact (fact Critical-Care-Advantage) (cf ?cf-Critical-Care-Advantage))
+   (drinkhabits y)      
    =>
     (printout t crlf "How often do you travel in a month? (e)veryday (o)nceortwice (s)eldom (n)o" crlf)
 	(bind ?response (read))
 	(assert(travel-frequency ?response))
 	(switch ?response
-		(case e then (assert (new_goal (goal Critical-Care-Advantage) (cf (* ?cf-Critical-Care-Advantage 0.8)))))
-		(case o then (assert (new_goal (goal Critical-Care-Advantage) (cf (* ?cf-Critical-Care-Advantage 0.65)))))
-		(case s then (assert (new_goal (goal Critical-Care-Advantage) (cf (* ?cf-Critical-Care-Advantage 0.60)))))
-		(case n then (assert (new_goal (goal Critical-Care-Advantage) (cf (* ?cf-Critical-Care-Advantage 0.5)))))
+		(case e then (assert (new_goal (goal Critical-Care-Advantage) (cf 0.8))))
+		(case o then (assert (new_goal (goal Critical-Care-Advantage) (cf 0.65))))
+		(case s then (assert (new_goal (goal Critical-Care-Advantage) (cf 0.60))))
+		(case n then (assert (new_goal (goal Critical-Care-Advantage) (cf 0.5))))
 	)
 )
 
 (defrule medical-condition ""
    (travel-frequency ?)
-   (not (medical-condition ?))
-   (current_fact (fact Critical-Care-Advantage) (cf ?cf-Critical-Care-Advantage))
+   (not (medical-condition ?))   
    =>
     (printout t crlf "Do you have any existing medical condition? (y)es/(n)o" crlf)
 	(bind ?response (read))
 	(assert(medical-condition ?response))
 	(if(eq ?response y)
-		then (assert (new_goal (goal Critical-Care-Advantage) (cf (* ?cf-Critical-Care-Advantage 0.8))))
+		then (assert (new_goal (goal Critical-Care-Advantage) (cf 0.8)))
     )
 )
 
 (defrule parent-medical-condition ""
    (medical-condition  ?)
-   (not (parent-medical-condition ?))
-   (current_fact (fact Critical-Care-Advantage) (cf ?cf-Critical-Care-Advantage))
+   (not (parent-medical-condition ?))   
    =>
     (printout t crlf "Does any of your parents have or had critical medical condition? (y)es/(n)o" crlf)
 	(bind ?response (read))
 	(assert(parent-medical-condition ?response))
 	(if(eq ?response y)
-		then (assert (new_goal (goal Critical-Care-Advantage) (cf (* ?cf-Critical-Care-Advantage 0.7))))
+		then (assert (new_goal (goal Critical-Care-Advantage) (cf 0.7)))
     )
 )
 
 (defrule high-stress-job ""
    (parent-medical-condition ?)
-   (not (high-stress-job ?))
-   (current_fact (fact Critical-Care-Advantage) (cf ?cf-Critical-Care-Advantage))
+   (not (high-stress-job ?))   
    =>
     (printout t crlf "How do you scale your current job stress level? (1-10)" crlf)
 	(bind ?response (read))
 	(assert(high-stress-job ?response))
 	(if(>= ?response 5)
-		then (assert (new_goal (goal Critical-Care-Advantage) (cf (* ?cf-Critical-Care-Advantage 0.8))))
-		else (assert (new_goal (goal Critical-Care-Advantage) (cf (* ?cf-Critical-Care-Advantage 0.6))))
+		then (assert (new_goal (goal Critical-Care-Advantage) (cf 0.8)))
+		else (assert (new_goal (goal Critical-Care-Advantage) (cf 0.6)))
     )
 )
 
@@ -810,7 +728,21 @@
 )
 
 
+;;;***********************************************************
+;;;	Supreme Health Standard Plan + Critical Care
+;;;***********************************************************
 
+(defrule compile_standard_criticalcare_recommendations
+	(current_goal (goal Supreme-Health-Standard-Plan) (cf ?cf-Supreme-Health-Standard-Plan))
+	(current_goal (goal Critical-Care-Advantage) (cf ?cf-Critical-Care-Advantage))
+=>	(assert (recommendation
+		(Supreme-Health-Standard-Plan ?cf-Supreme-Health-Standard-Plan)
+		(Critical-Care-Advantage ?cf-Critical-Care-Advantage)
+	))
+	(printout t crlf "Recommendation:")
+	(printout t crlf "Supreme-Health-Standard-Plan: " ?cf-Supreme-Health-Standard-Plan)	
+	(printout t crlf "Critical-Care-Advantage: " ?cf-Critical-Care-Advantage crlf)	
+)
 
 ;;;***********************************************************
 ;;;	Long Term Care Plan
