@@ -35,6 +35,8 @@
 	(slot ElderShield_Comprehensive-2ADL)
 	(slot Flexi-Maternity-Cover-Enhanced)
 	(slot Flexi-Maternity-Cover-Essential)
+    (slot Pay-Assure)
+    (slot Life-Secure)
 	)
 
 (defrule initialise-current-goal	
@@ -165,7 +167,7 @@
     (regular-exercise ?)
     (not (employment-status ?))
    =>   
-    (printout t crlf "What is your employment status? (f)ull-time/(p)art-time" crlf)
+    (printout t crlf "What is your employment status? (f)ull-time/(p)art-time/(n)one" crlf)
 	(bind ?response (read))
 	(assert (employment-status ?response))
 )
@@ -966,7 +968,11 @@
     (or (age 2) (age 3))
 => (printout t "Are you pregnant? (y)es/(n)o" crlf)
    (bind ?is-pregnant (read))
-   (assert (is-pregnant ?is-pregnant)))
+   (assert (is-pregnant ?is-pregnant))
+   (if (eq ?is-pregnant n)
+      (assert (income-protection start))
+   )
+)
    
 ;;if pregnant then check pregnancy week
 (defrule ask-pregnant-week
@@ -1021,6 +1027,7 @@
   (assert (current_goal (goal Flexi-Maternity-Cover-Enhanced) (cf 0)))
   (assert (current_goal (goal Flexi-Maternity-Cover-Essential) (cf 0)))
   (assert (Flexi-Maternity-Eligible n)))
+  (assert (income-protection start))
 
 
 ;;if eligible to buy then check higher coverage
@@ -1028,8 +1035,9 @@
    (Flexi-Maternity-Eligible y)
 => (printout t "Do you want to have a higher coverage with higher budget? (y)es/(n)o" crlf)
    (bind ?higher-coverage (read))
-   (assert (higher-coverage ?higher-coverage)))
-   
+   (assert (higher-coverage ?higher-coverage))
+   (assert (income-protection start))
+)
 
 ;;if higher coverage then choose premium for enhanced plan 
 (defrule premium-for-enhanced-plan
@@ -1042,7 +1050,8 @@
 (defrule premium-for-essential-plan
   (higher-coverage n)
 =>(assert (current_goal (goal Flexi-Maternity-Cover-Essential) (cf 1.0)))
-  (assert (current_goal (goal Flexi-Maternity-Cover-Enhanced) (cf -1.0))))
+  (assert (current_goal (goal Flexi-Maternity-Cover-Enhanced) (cf -1.0)))
+)
 
 ;;conclusion-Flexi-Maternity-Cover
 (defrule conclusion-Flexi-Maternity-Cover-Plan
@@ -1056,4 +1065,33 @@
 
 ;;;***********************************************************
 ;;;	End of Flexi Maternity Cover
+;;;***********************************************************
+
+;;;***********************************************************
+;;;	Income Protection Start
+;;;***********************************************************
+
+;;; Do you prefer fixed or flexible payout?
+(defrule fixed-vs-flexible-qn
+    (income-protection start)
+	(or (employment-status f)(employment-status p))
+    (not (fixed-vs-flexible-ans ?))
+=>	(printout t "Do you prefer payout based on a portion of your monthly salary or a fixed amount? (f)lexible/fi(x)ed" crlf)
+	(bind ?answer (read))
+	(assert (fixed-vs-flexible-ans ?answer))
+    (printout t crlf "We recommend below income protection package: " crlf)
+    (if (eq ?answer f)
+        then
+            (assert (current_goal(goal Pay-Assure)(cf 1.0)))
+            (assert (recommendation (Pay-Assure 1.0)))
+            (printout t crlf "Pay-Assure: 1.0" crlf)
+        else
+            (assert (current_goal(goal Life-Secure)(cf 1.0)))
+            (assert (recommendation (Life-Secure 1.0)))
+            (printout t crlf "Life-Secure: 1.0" crlf)
+    )
+)
+
+;;;***********************************************************
+;;;	Income Protection End
 ;;;***********************************************************
