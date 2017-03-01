@@ -168,8 +168,13 @@
 	(switch ?response
 		(case s then	(assert (Supreme-MediCash-start start))
 						(assert (standard-vs-comprehensive-ans Standard))
-						(assert (current_goal (goal Supreme-Health-Standard-Plan) (cf 0.1))))
+						(assert (current_goal (goal Supreme-Health-Standard-Plan) (cf 0.65)))
+						(assert (current_goal (goal Supreme-Health-B-PLUS) (cf -1.0)))
+						(assert (current_goal (goal Supreme-Health-A-PLUS) (cf -1.0)))
+						(assert (current_goal (goal Supreme-Health-P-PLUS) (cf -1.0)))
+		)
 		(case c then	(assert (standard-vs-comprehensive-ans Comprehensive))
+						(assert (current_goal (goal Supreme-Health-Standard-Plan) (cf -1.0)))
 						(assert (current_goal (goal Supreme-Health-B-PLUS) (cf 0.1)))
 						(assert (current_goal (goal Supreme-Health-A-PLUS) (cf 0.1)))
 						(assert (current_goal (goal Supreme-Health-P-PLUS) (cf 0.1)))
@@ -596,7 +601,8 @@
     )
 )
 
-;;; Recommendation
+;;; Recommendation 
+;;; To-Do : separate by product category (Ricky)
 (defrule compile_recommendations
 	(current_goal (goal Supreme-Health-Standard-Plan) (cf ?cf-Supreme-Health-Standard-Plan))
 	(current_goal (goal Supreme-Health-B-PLUS) (cf ?cf-Supreme-Health-B-PLUS))
@@ -675,34 +681,21 @@
 )
 
 
-;;;***********************************************************
-;;;	Supreme Health Standard Plan + Critical Care
-;;;***********************************************************
+;;;***************************************************************
+;;;	Supreme Health Policy + Critical Care Recommendation Category
+;;;***************************************************************
 
 (defrule compile_standard_criticalcare_recommendations
 	(current_goal (goal Supreme-Health-Standard-Plan) (cf ?cf-Supreme-Health-Standard-Plan))
-	(current_goal (goal Critical-Care-Advantage) (cf ?cf-Critical-Care-Advantage))
-=>	(assert (recommendation
-		(Supreme-Health-Standard-Plan ?cf-Supreme-Health-Standard-Plan)
-		(Critical-Care-Advantage ?cf-Critical-Care-Advantage)
-	))
-	(printout t crlf "Recommendation:")
-	(printout t crlf "Supreme-Health-Standard-Plan: " ?cf-Supreme-Health-Standard-Plan)	
-	(printout t crlf "Critical-Care-Advantage: " ?cf-Critical-Care-Advantage crlf)	
-)
-
-;;;***********************************************************
-;;;	Supreme Health B Plus Plan + Critical Care
-;;;***********************************************************
-
-(defrule compile_bplus_criticalcare_recommendations
 	(current_goal (goal Supreme-Health-B-PLUS) (cf ?cf-Supreme-Health-B-PLUS))
 	(current_goal (goal Critical-Care-Advantage) (cf ?cf-Critical-Care-Advantage))
 =>	(assert (recommendation
+		(Supreme-Health-Standard-Plan ?cf-Supreme-Health-Standard-Plan)
 		(Supreme-Health-B-PLUS ?cf-Supreme-Health-B-PLUS)
 		(Critical-Care-Advantage ?cf-Critical-Care-Advantage)
 	))
 	(printout t crlf "Recommendation:")
+	(printout t crlf "Supreme-Health-Standard-Plan: " ?cf-Supreme-Health-Standard-Plan)	
 	(printout t crlf "Supreme-Health-B-Plus-Plan: " ?cf-Supreme-Health-B-PLUS)	
 	(printout t crlf "Critical-Care-Advantage: " ?cf-Critical-Care-Advantage crlf)	
 )
