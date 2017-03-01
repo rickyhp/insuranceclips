@@ -704,6 +704,18 @@
     )
 )
 
+(defrule parent-medical-condition ""
+   (medical-condition  ?)
+   (not (parent-medical-condition ?))
+   (current_fact (fact Critical-Care-Advantage) (cf ?cf-Critical-Care-Advantage))
+   =>
+    (printout t crlf "Does any of your parents have or had critical medical condition? (y)es/(n)o" crlf)
+	(bind ?response (read))
+	(assert(parent-medical-condition ?response))
+	(if(eq ?response y)
+		then (assert (new_goal (goal Critical-Care-Advantage) (cf (* ?cf-Critical-Care-Advantage 0.8))))
+    )
+)
 
 ;;; Recommendation
 (defrule compile_recommendations
