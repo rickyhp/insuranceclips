@@ -680,23 +680,50 @@
 	(printout t crlf "ElderShield Comprehensive 2 ADLs: " (integer (* ?cf-2adl 100)) "%" crlf)
 )
 
+;;;***************************************************************
+;;;	Supreme Health Policy Only Recommendation Category
+;;;***************************************************************
+
+(defrule compile_supremehealth_only_recommendations
+	(current_goal (goal Supreme-Health-Standard-Plan) (cf ?cf-Supreme-Health-Standard-Plan))
+	(current_goal (goal Supreme-Health-B-PLUS) (cf ?cf-Supreme-Health-B-PLUS))
+	(current_goal (goal Supreme-Health-A-PLUS) (cf ?cf-Supreme-Health-A-PLUS))
+	(current_goal (goal Supreme-Health-P-PLUS) (cf ?cf-Supreme-Health-P-PLUS))
+=>	(assert (recommendation
+		(Supreme-Health-Standard-Plan ?cf-Supreme-Health-Standard-Plan)
+		(Supreme-Health-B-PLUS ?cf-Supreme-Health-B-PLUS)
+		(Supreme-Health-A-PLUS ?cf-Supreme-Health-A-PLUS)
+		(Supreme-Health-P-PLUS ?cf-Supreme-Health-P-PLUS)
+	))
+	(printout t crlf "Recommendation:")
+	(printout t crlf "Supreme-Health-Standard-Plan: " ?cf-Supreme-Health-Standard-Plan)
+	(printout t crlf "Supreme-Health-B-PLUS: " ?cf-Supreme-Health-B-PLUS)
+	(printout t crlf "Supreme-Health-A-PLUS: " ?cf-Supreme-Health-A-PLUS)
+	(printout t crlf "Supreme-Health-P-PLUS: " ?cf-Supreme-Health-P-PLUS)
+)
 
 ;;;***************************************************************
 ;;;	Supreme Health Policy + Critical Care Recommendation Category
 ;;;***************************************************************
 
-(defrule compile_standard_criticalcare_recommendations
+(defrule compile_supremehealth_criticalcare_recommendations
 	(current_goal (goal Supreme-Health-Standard-Plan) (cf ?cf-Supreme-Health-Standard-Plan))
 	(current_goal (goal Supreme-Health-B-PLUS) (cf ?cf-Supreme-Health-B-PLUS))
+	(current_goal (goal Supreme-Health-A-PLUS) (cf ?cf-Supreme-Health-A-PLUS))
+	(current_goal (goal Supreme-Health-P-PLUS) (cf ?cf-Supreme-Health-P-PLUS))
 	(current_goal (goal Critical-Care-Advantage) (cf ?cf-Critical-Care-Advantage))
 =>	(assert (recommendation
 		(Supreme-Health-Standard-Plan ?cf-Supreme-Health-Standard-Plan)
 		(Supreme-Health-B-PLUS ?cf-Supreme-Health-B-PLUS)
+		(Supreme-Health-A-PLUS ?cf-Supreme-Health-A-PLUS)
+		(Supreme-Health-P-PLUS ?cf-Supreme-Health-P-PLUS)
 		(Critical-Care-Advantage ?cf-Critical-Care-Advantage)
 	))
 	(printout t crlf "Recommendation:")
 	(printout t crlf "Supreme-Health-Standard-Plan: " ?cf-Supreme-Health-Standard-Plan)	
-	(printout t crlf "Supreme-Health-B-Plus-Plan: " ?cf-Supreme-Health-B-PLUS)	
+	(printout t crlf "Supreme-Health-B-PLUS: " ?cf-Supreme-Health-B-PLUS)
+	(printout t crlf "Supreme-Health-A-PLUS: " ?cf-Supreme-Health-A-PLUS)
+	(printout t crlf "Supreme-Health-P-PLUS: " ?cf-Supreme-Health-P-PLUS)
 	(printout t crlf "Critical-Care-Advantage: " ?cf-Critical-Care-Advantage crlf)	
 )
 
