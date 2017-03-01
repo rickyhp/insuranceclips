@@ -1048,8 +1048,8 @@
 (defrule conclusion-Flexi-Maternity-Cover-Plan
   (current_goal (goal Flexi-Maternity-Cover-Enhanced) (cf ?cf-Flexi-Maternity-Cover-Enhanced))
   (current_goal (goal Flexi-Maternity-Cover-Essential) (cf ?cf-Flexi-Maternity-Cover-Essential))
-=>(printout t crlf "Flexi-Maternity-Cover-Enhanced: " ?cf-Flexi-Maternity-Cover-Enhanced "%" crlf)
-  (printout t crlf "Flexi-Maternity-Cover-Essential: " ?cf-Flexi-Maternity-Cover-Essential "%" crlf)
+=>(printout t crlf "Flexi-Maternity-Cover-Enhanced: " ?cf-Flexi-Maternity-Cover-Enhanced crlf)
+  (printout t crlf "Flexi-Maternity-Cover-Essential: " ?cf-Flexi-Maternity-Cover-Essential crlf)
   (assert (recommendation (Flexi-Maternity-Cover-Enhanced ?cf-Flexi-Maternity-Cover-Enhanced)
                           (Flexi-Maternity-Cover-Essential ?cf-Flexi-Maternity-Cover-Essential))))
 	
