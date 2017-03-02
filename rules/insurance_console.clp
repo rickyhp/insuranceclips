@@ -122,9 +122,19 @@
 	(assert (age ?response))
 )
 
+;; Citizenship
+;; What is your citizenship ?
+(defrule citizenship=SC_SPR
+	(age ?)
+    (not (citizenship ?))
+=>	(printout t "What is your citizenship? (s)ingaporean/(p)r/(f)oreigner" crlf)
+	(bind ?answer (read))
+	(assert (citizenship ?response))
+)
+
 ;; Income
 (defrule determine-income
-    (age ?)
+    (citizenship ?)
     (not (income ?))
    =>   
     (printout t crlf "Please indicate your income range: (1) below 2000 (2) between 2000-7000 (3) above 7000" crlf)
@@ -813,36 +823,16 @@
 ;;;	Long Term Care Plan
 ;;;***********************************************************
 
-;;;Rule 1
 ;; Are you >= 40 years old?
 (defrule age>=40-years-old 
-	(age ?a)
+	(or (age 3)(age 4))
+    (or (citizenship s)(citizenship p))
+    (long-term-care start)
 	=>
-	(switch ?a
-		(case 1 then	(assert (current_fact (fact age) (cf -1.0))))
-		(case 2 then	(assert (current_fact (fact age) (cf -1.0))))
-		(case 3 then	(assert (current_fact (fact age) (cf 1.0))))
-		(case 4 then	(assert (current_fact (fact age) (cf 1.0))))
-	)
+    (assert (current_fact(fact age) (cf 1.0)))
+	(assert (current_fact(fact citizenship) (cf 1.0)))
 )
 
-
-;;;Rule 2
-;; Are you Singapore Citizen or Singapore PR?
-(defrule citizenship=SC_SPR
-	(current_fact (fact age) (cf 1.0))
-=>	(printout t "Singapore Citizen or Singapore PR? (y)es/(n)o" crlf)
-	(bind ?answer (read))
-	(if (eq ?answer y) 
-	then
-		(assert (current_fact (fact citizenship) (cf 1.0)))
-	else
-		(assert (current_fact (fact citizenship) (cf -1.0)))	
-	)
-)
-
-
-;;;Rule 3
 ;; Do you have any pre-existing disability?
 (defrule pre-existing-disability-yes
 	(current_fact (fact age) (cf 1.0))
@@ -857,8 +847,6 @@
 	)
 )
 
-
-;Rule 4
 ;; Do you want payout to commence when unable to perform 2 instead of 3 ADLs?
 (defrule want-payout-commence-2-ADL
 	(current_fact (fact age) (cf 1.0))
@@ -875,8 +863,6 @@
 	)
 )
 
-
-;Rule 5
 ;; Do you want payout for > 6 years? 
 (defrule want-payout->6-years
 	(current_fact (fact age) (cf 1.0))
@@ -893,8 +879,6 @@
 	)
 )
 
-
-;Rule 6
 ;; Do you want payout amount of > $400?
 (defrule want-payout-amount->400
 	(current_fact (fact age) (cf 1.0))
