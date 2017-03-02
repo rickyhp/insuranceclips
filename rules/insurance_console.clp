@@ -911,9 +911,9 @@
 )
 
 
-;;;*******************
-;;;* CONCLUSIONS *****
-;;;*******************
+;;;***************************************
+;;;* Long-term care plan CONCLUSIONS *****
+;;;***************************************
 
 (defrule conclusion-age-not-eligible-ElderShield
 	(current_fact (fact age) (cf -1.0))
