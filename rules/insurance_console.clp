@@ -129,7 +129,7 @@
     (not (citizenship ?))
 =>	(printout t "What is your citizenship? (s)ingaporean/(p)r/(f)oreigner" crlf)
 	(bind ?answer (read))
-	(assert (citizenship ?response))
+	(assert (citizenship ?answer))
 )
 
 ;; Income
@@ -824,13 +824,21 @@
 ;;;***********************************************************
 
 ;; Are you >= 40 years old?
-(defrule age>=40-years-old 
-	(or (age 3)(age 4))
-    (or (citizenship s)(citizenship p))
-    (long-term-care start)
+(defrule age>=40-years-old
+	(long-term-care start)
+	(age ?a)
+    (citizenship ?c)
 	=>
-    (assert (current_fact(fact age) (cf 1.0)))
-	(assert (current_fact(fact citizenship) (cf 1.0)))
+	(switch ?c
+		(case s then (assert (current_fact(fact citizenship) (cf 1.0))))
+		(case p then (assert (current_fact(fact citizenship) (cf 1.0))))
+		(default then (assert (current_fact(fact citizenship) (cf -1.0))))
+	)
+	(switch ?a
+		(case 3 then (assert (current_fact(fact age) (cf 1.0))))
+		(case 4 then (assert (current_fact(fact age) (cf -1.0))))
+		(default then (assert (current_fact(fact citizenship) (cf -1.0))))
+	)
 )
 
 ;; Do you have any pre-existing disability?
@@ -918,7 +926,6 @@
 	(assert (current_goal (goal ElderShield_Comprehensive-2ADL) (cf 0.0)))  
 )
 
-
 (defrule conclusion-contact-insurance-adviser
    (current_fact (fact no_disability) (cf -1.0))
 => 
@@ -927,8 +934,6 @@
 	(assert (current_goal (goal ElderShield_Comprehensive-3ADL) (cf 0.0)))
 	(assert (current_goal (goal ElderShield_Comprehensive-2ADL) (cf 0.0)))  
 )
-
-
 
 (defrule conclusion-ElderShield
    (not(current_fact (fact age) (cf -1.0)))
@@ -1019,8 +1024,7 @@
    (Flexi-Maternity-Eligible y)
 => (printout t "Do you want to have a higher coverage with higher budget? (y)es/(n)o" crlf)
    (bind ?higher-coverage (read))
-   (assert (higher-coverage ?higher-coverage))
-   (assert (income-protection start))
+   (assert (higher-coverage ?higher-coverage))   
 )
 
 ;;if higher coverage then choose premium for enhanced plan 
@@ -1044,9 +1048,9 @@
 =>(printout t crlf "Flexi-Maternity-Cover-Enhanced: " ?cf-Flexi-Maternity-Cover-Enhanced crlf)
   (printout t crlf "Flexi-Maternity-Cover-Essential: " ?cf-Flexi-Maternity-Cover-Essential crlf)
   (assert (recommendation (Flexi-Maternity-Cover-Enhanced ?cf-Flexi-Maternity-Cover-Enhanced)
-                          (Flexi-Maternity-Cover-Essential ?cf-Flexi-Maternity-Cover-Essential))))
-	
-
+                          (Flexi-Maternity-Cover-Essential ?cf-Flexi-Maternity-Cover-Essential))))    
+  (assert (income-protection start))
+  
 ;;;***********************************************************
 ;;;	End of Flexi Maternity Cover
 ;;;***********************************************************
@@ -1074,6 +1078,7 @@
             (assert (recommendation (Life-Secure 1.0)))
             (printout t crlf "Life-Secure: 1.0" crlf)
     )
+	(assert (long-term-care start))
 )
 
 ;;;***********************************************************
