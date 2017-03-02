@@ -967,11 +967,11 @@
     (gender f)
     (or (age 2) (age 3))
 => (printout t "Are you pregnant? (y)es/(n)o" crlf)
-   (bind ?is-pregnant (read))
-   (assert (is-pregnant ?is-pregnant))
-   (if (eq ?is-pregnant n)
-      (assert (income-protection start))
+   (bind ?response (read))
+   (if (eq ?response n)
+      then(assert (income-protection start))
    )
+   (assert (is-pregnant ?response))   
 )
    
 ;;if pregnant then check pregnancy week
