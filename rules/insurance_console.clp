@@ -61,9 +61,9 @@
   =>
   	(retract ?f2) ; removes new_goal
 	(modify ?f1 (cf =(+ ?cf1 (* ?cf2 (- 1 ?cf1)))))
-	(printout t "B-1= " ?cf1 crlf) ;;; for debugging
-	(printout t "B-2= " ?cf2 crlf) ;;; for debugging
-	(printout t "B1-B2 combined = " (+ ?cf1 (* ?cf2 (- 1 ?cf1))) crlf)
+	;;(printout t "B-1= " ?cf1 crlf) ;;; for debugging
+	;;(printout t "B-2= " ?cf2 crlf) ;;; for debugging
+	;;(printout t "B1-B2 combined = " (+ ?cf1 (* ?cf2 (- 1 ?cf1))) crlf)
 )
 
 ;;;***********************************************************************
